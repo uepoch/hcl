@@ -1,3 +1,4 @@
 inherited: true
 owners:
-- devtools@criteo.com
+- sre-idm@criteo.com
+- group/sre-idm
