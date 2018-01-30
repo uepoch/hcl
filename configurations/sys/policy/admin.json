@@ -1,0 +1,13 @@
+{
+    "path": {
+        "/*": {
+            "capabilities": [
+                "read",
+                "update",
+                "create",
+                "list",
+                "delete"
+            ]
+        }
+    }
+}

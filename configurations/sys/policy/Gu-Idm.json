@@ -1,0 +1,13 @@
+{
+    "path": {
+        "/secret/teams/Gu-Idm/*": {
+            "capabilities": [
+                "read",
+                "update",
+                "create",
+                "list",
+                "delete"
+            ]
+        }
+    }
+}

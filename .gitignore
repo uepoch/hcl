@@ -1,3 +1,10 @@
+# Specific paths
+.classpath
+.project
+.settings/
+.vscode/
+tmp/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

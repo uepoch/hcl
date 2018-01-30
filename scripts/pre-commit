@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+cd $(git rev-parse --show-toplevel)
+
+set -x
+set -e
+
+if [[ ! -e ./tmp/vault ]]; then
+  ./scripts/install.sh
+fi
+
+./scripts/tests.sh || exit $?
