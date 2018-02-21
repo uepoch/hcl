@@ -1,0 +1,9 @@
+{
+  "type": "kv",
+  "description": "Testing backend",
+  "config": {
+    "default_lease_ttl": "1h",
+    "max_lease_ttl": "2h"
+  },
+  "local": true
+}

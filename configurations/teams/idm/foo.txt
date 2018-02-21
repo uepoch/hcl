@@ -1,0 +1,5 @@
+bar "foo" {
+	key = 1
+}
+
+foo = "a"

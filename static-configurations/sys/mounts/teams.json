@@ -1,0 +1,9 @@
+{
+  "type": "kv",
+  "description": "Team Password Manager, now with electrolytes",
+  "config": {
+    "default_lease_ttl": "8h",
+    "max_lease_ttl": "24h"
+  },
+  "local": false
+}

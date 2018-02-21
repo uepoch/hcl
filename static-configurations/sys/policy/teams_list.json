@@ -1,0 +1,10 @@
+{
+  "path": {
+    "/teams": {
+      "capabilities": ["list"]
+    },
+    "/teams/*": {
+      "capabilities": []
+    }
+  }
+}

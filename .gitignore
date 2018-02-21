@@ -1,4 +1,6 @@
 # Specific paths
+build/
+.idea/
 .classpath
 .project
 .settings/

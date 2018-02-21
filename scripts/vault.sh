@@ -14,28 +14,18 @@ start_vault() {
     exit 1
   fi
   nohup \
-  ./vault server -dev -dev-listen-address="${addr}" -log-level=trace \
+  ./vault server -dev -dev-listen-address="${addr}" -dev-root-token-id="${VAULT_TOKEN}" -log-level=trace \
   > vault.log 2>&1 &
   echo $! > vault.pid
   chmod 400 vault.pid
-  if [[ -e "${HOME}/.vault-token" ]]; then
-    >&2 echo "ERROR: please ~/.vault-token already exists,"
-    >&2 echo "clean that before starting vault in dev mode!"
-    exit 1
-  fi
-  until mv "${HOME}/.vault-token" ./vault.token &> /dev/null; do
-    echo "waiting for vault token..."
-    sleep 1
-  done
-  chmod 400 vault.token
-  local vault_token="$(cat ./vault.token)"
   echo "${addr}" > vault.addr
   local pid="$(cat ./vault.pid)"
-  until VAULT_ADDR="http://${addr}" ./vault status; do
+  until VAULT_ADDR=http://${addr} ./vault status; do
     >&2 echo "vault server is inaccessible!"
+        sleep 2
   done
-  echo "vault pid: ${pid} started at ${addr}, see vault.log."
-  echo "vault token: ${vault_token}"
+  echo "vault pid: ${pid} started at ${vault_addr}, see vault.log."
+  echo "vault token: ${VAULT_TOKEN}"
 }
 
 stop_vault() {
@@ -46,7 +36,7 @@ stop_vault() {
   fi
   local pid="$(cat ./vault.pid)"
   local addr="$(cat ./vault.addr)"
-  kill "$pid" && \
+  kill "$pid"
   rm -f vault.*
   echo "vault pid:$pid from ${addr} is stopped!"
 }
@@ -58,12 +48,16 @@ status_vault() {
   fi
   local pid="$(cat ./vault.pid)"
   local addr="$(cat ./vault.addr)"
-  echo "vault running pid:$pid at $addr, see vault.log..."
+  echo "vault running pid:$pid at http://$addr, see vault.log..."
 }
 
 # main
 
 cd $(git rev-parse --show-toplevel)
+
+export VAULT_TOKEN=$(cat ./scripts/vault-dev-token.txt)
+
+
 cd ./tmp
 
 case $1 in
@@ -76,6 +70,7 @@ start)
     >&2 echo "Impossible to start vault in dev mode, ${addr} occupied!"
     ((port++))
     addr=${ip}:${port}
+    sleep 2
   done
   ;;
 stop)
