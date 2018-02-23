@@ -80,21 +80,20 @@ def generate_policies(acl):
 
 
 # TODO(m.conraux): Add filter for the "rights" subkey in the entity list
-def generate_files(ACLs, output_dir, logindent=0):
+def generate_files(ACLs, output_dir):
     ret = []
     for acl in ACLs:
         logging.debug("Creating files for %s", acl)
         for name, role, policy in generate_policies(acl):
-            logging.info("%sPolicy: %s", "-" * logindent, name)
             policy_file = "{}/{}/{}.json".format(output_dir, VAULT_POLICIES_PATH, name)
-            # client.set_policy(name, hcl.dumps(policy))
-            write_file(policy_file, hcl.dumps(policy))
-            logging.debug("Created %s", policy_file)
+            write_file(policy_file, hcl.dumps(policy, indent=4))
+            logging.info("Generated %s team policy", name)
+            logging.debug("With content: %s", policy_file)
             for entity in ["{}/{}".format(entityType, name) for entityType in acl["roles"][role] for name in
                            acl["roles"][role][entityType]]:
                 add_policy_to_ldap_entity_file("{}/auth/ldap/{}.json".format(output_dir, entity), name)
             ret.append(name)
-        for x in generate_files(acl["subpaths"], output_dir, logindent + 2):
+        for x in generate_files(acl["subpaths"], output_dir):
             ret.append(x)
     return ret
 

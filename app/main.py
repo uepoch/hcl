@@ -20,6 +20,10 @@ VAULT_POLICIES_PATH = "sys/policy"
 
 VAULT_DATA_KEY = "data"
 
+VAULT_ROTATE_SUFFIX_UNIT_DAYS = "d"
+VAULT_ROTATE_SUFFIX_UNIT_HOURS = "h"
+VAULT_ROTATE_SUFFIX_FORMAT = "-{number}{unit}"
+
 
 def enable_auth_backends(client, conf_dir):
     backends = client.list_auth_backends()
@@ -30,24 +34,26 @@ def enable_auth_backends(client, conf_dir):
 
 
 def enable_secret_backends(client, conf_dir):
-    backends = client.list_secret_backends()
-    for backend, conf in [(get_name(os.path.basename(x)), parse(x)) for x in
+    remote_backends = client.list_secret_backends()
+    for local_backend, conf in [(get_name(os.path.basename(x)), parse(x)) for x in
                           glob.glob("{}/{}/*".format(conf_dir, VAULT_MOUNTS_PATH))]:
-        backend_path = backend + "/"
-        if backend_path in backends:
-            orig = backends[backend_path]
-            if orig['type'] is not conf['type']:
-                logging.error("%s secret backend have a different type in the configuration and server", backend)
-            if orig['description'] is not conf['description']:
+        backend_path = local_backend + "/"
+        if backend_path in remote_backends:
+            orig = remote_backends[backend_path]
+            if orig['type'] != conf['type']:
+                logging.error("%s secret backend have a different type in the configuration and server", local_backend)
+                logging.error("Remote: %s", orig)
+                logging.error("Local: %s", conf)
+            if orig['description'] != conf['description']:
                 logging.warning("%s secret backend have a different description in the configuration and server",
-                                backend)
-            logging.info("Updating TTL information for %s", backend)
-            client.write("{}/{}/tune".format(VAULT_MOUNTS_PATH, backend),
+                                local_backend)
+            logging.info("Updating TTL information for %s", local_backend)
+            client.write("{}/{}/tune".format(VAULT_MOUNTS_PATH, local_backend),
                          default_lease_ttl=conf.get("config", {}).get("default_lease_ttl", 0),
                          max_lease_ttl=conf.get("config", {}).get("max_lease_ttl", 0))
         else:
-            logging.info("Enabling %s secret backend", backend)
-            client.write("{}/{}".format(VAULT_MOUNTS_PATH, backend), **conf)
+            logging.info("Enabling %s secret backend", local_backend)
+            client.write("{}/{}".format(VAULT_MOUNTS_PATH, local_backend), **conf)
 
 
 def build_static_config(input_dir, output_dir, template=True, ctx=None):
@@ -109,6 +115,36 @@ def apply_configuration(client, conf_dir, cleanup=True):
 
     crawl_map(apply_then_cleanup, conf_dir + "sys/*", conf_dir + "/*")
 
+def generate_versionned_policies(hours=3, days=2):
+    pdir = BUILD_PATH + VAULT_POLICIES_PATH
+    mdir = BUILD_PATH + VAULT_MOUNTS_PATH
+    KVs = []
+    for f in glob.glob(mdir+'/*'):
+        logging.debug("Checking if %s is a KV mount", f)
+        mount = parse(f)
+        if mount.get("type", "") == "kv":
+            KVs.append(os.path.basename(get_name(f)))
+            logging.debug("- Adding it to the list")
+
+    if len(KVs) > 0:
+        logging.info("Found some KV mount-point to rotate: %s", KVs)
+        def reconfigure_policy(f):
+            p = parse(f)
+            logging.debug("Searching in %s", f)
+            for path, capabilities in list(p.get("path", {}).items()):
+                mount_point = path.split('/')[0]
+                if mount_point in KVs:
+                    for i in  range(1, hours+1):
+                        p["path"][path.replace(mount_point, mount_point+VAULT_ROTATE_SUFFIX_FORMAT.format(unit=VAULT_ROTATE_SUFFIX_UNIT_HOURS, number=i))] = capabilities
+                    for i in  range(1, days+1):
+                        p["path"][path.replace(mount_point, mount_point+VAULT_ROTATE_SUFFIX_FORMAT.format(unit=VAULT_ROTATE_SUFFIX_UNIT_DAYS, number=i))] = capabilities
+                    logging.info("Updated %s with %d rotate paths on ", vaultify_path(f), hours+days, path)
+            write_file(f, hcl.dumps(p, indent=4))
+        crawl_map(reconfigure_policy, pdir+"/*")
+
+
+
+
 
 def main():
     logging.basicConfig(level=logging.INFO, stream=sys.stdout)
@@ -128,6 +164,7 @@ def main():
     teams.generate_team_storage("../configurations/teams", BUILD_PATH)
     enable_auth_backends(client, BUILD_PATH)
     enable_secret_backends(client, BUILD_PATH)
+    generate_versionned_policies(hours=3, days=2)
     apply_configuration(client, BUILD_PATH, cleanup=True)
 
 
