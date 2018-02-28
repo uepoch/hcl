@@ -27,7 +27,6 @@ is_interactive=$1
 trap exit_status EXIT
 
 set -e
-set -x
 
 echo "*** INFO: Test vault configurations ***"
 
@@ -43,9 +42,6 @@ export VAULT_TOKEN="$(cat ./scripts/vault-dev-token.txt)"
 echo "*** INFO: first execution, to provision vault server ***"
 python ./app/main.py
 
-echo "*** INFO: second execution, to verify that configuration overload works ***"
-
-python ./app/main.py
 
 if [[ "${is_interactive}" != "--interactive" ]]; then
   ./scripts/vault.sh stop

@@ -21,7 +21,7 @@ ACL_GRANTERS = ['users', 'groups']
 RO_RIGHTS = {"capabilities": ["read", "list"]}
 RW_RIGHTS = {"capabilities": RO_RIGHTS['capabilities'] + ['update', 'create', 'delete']}
 NO_RIGHTS = {"capabilities": []}
-TEAM_POLICY_PREFIX = "_team_policy"
+TEAM_POLICY_PREFIX = "__team_policy"
 
 DEFAULT_ROLES = {"ro": RO_RIGHTS, "rw": RW_RIGHTS}
 
@@ -73,7 +73,7 @@ def generate_policies(acl):
                 r = role["rights"]
         elif k in DEFAULT_ROLES:
             r = DEFAULT_ROLES[k]
-        main = {"path": {acl["path"]: r}}
+        main = {"path": {acl["path"] + "/*": r}}
         denied_paths = {x["path"] + "/*": NO_RIGHTS for x in acl["subpaths"]}
         main["path"].update(denied_paths)
         yield (generate_policy_name(acl["path"], k), k, main)

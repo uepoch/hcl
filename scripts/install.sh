@@ -1,16 +1,18 @@
 #!/usr/bin/env bash
 
+TMPDIR="./tmp"
 
 cd $(git rev-parse --show-toplevel)
 
 vault_version="$(cat ./VAULT_VERSION | tr -d '\n')"
 
-mkdir -p ./tmp
-cd ./tmp
+if ! [ -d "$TMPDIR" ]; then
+    mkdir -p "$TMPDIR"
+fi
+cd "$TMPDIR"
 
 
-if command -v vault && [ "$(vault version | awk '{print $2}')" == "v${vault_version}" ]; then
-    echo "Using PATH's vault"
+if command -v vault > /dev/null && [ "$(vault version | awk '{print $2}')" == "v${vault_version}" ]; then
     if ! [ -e "./vault" ]; then
         ln -s $(command -v vault) ./vault
     fi

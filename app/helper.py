@@ -11,7 +11,7 @@ import glob
 
 
 def vaultify_path(path):
-    return "/".join(path.split("/")[2:])
+    return "/".join(path.split("/")[1:])
 
 
 def render_template(file_path, ctx):
@@ -62,7 +62,7 @@ def add_policy_to_ldap_entity_file(file_path, *policy_names, prefix_cleanup=None
             entity["policies"] = [x for x in p if not x.startswith(prefix_cleanup)]
         entity["policies"] += policy_names
         entity["policies"] = list(set(entity["policies"]))
-        write_file(file_path, hcl.dumps(entity))
+        write_file(file_path, hcl.dumps(entity, indent=4))
         logging.debug("Updated %s and assigned %s to it", file_path, policy_names)
 
 

@@ -1,10 +1,7 @@
 {
   "path": {
-    "/teams": {
-      "capabilities": ["list"]
-    },
-    "/teams/*": {
-      "capabilities": []
+    "teams/": {
+      "capabilities": ["read", "list"]
     }
   }
 }

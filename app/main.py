@@ -10,10 +10,11 @@ import shutil
 import teams
 import logging
 import glob
+import argparse
 from helper import *
 
-STATIC_CONF_PATH = "../static-configurations"
-BUILD_PATH = "../build/"
+STATIC_CONF_PATH = "static-configurations"
+BUILD_PATH = "build/"
 
 VAULT_MOUNTS_PATH = "sys/mounts"
 VAULT_POLICIES_PATH = "sys/policy"
@@ -134,39 +135,47 @@ def generate_versionned_policies(hours=3, days=2):
             for path, capabilities in list(p.get("path", {}).items()):
                 mount_point = path.split('/')[0]
                 if mount_point in KVs:
-                    for i in  range(1, hours+1):
+                    for i in range(1, hours+1):
                         p["path"][path.replace(mount_point, mount_point+VAULT_ROTATE_SUFFIX_FORMAT.format(unit=VAULT_ROTATE_SUFFIX_UNIT_HOURS, number=i))] = capabilities
-                    for i in  range(1, days+1):
+                    for i in range(1, days+1):
                         p["path"][path.replace(mount_point, mount_point+VAULT_ROTATE_SUFFIX_FORMAT.format(unit=VAULT_ROTATE_SUFFIX_UNIT_DAYS, number=i))] = capabilities
-                    logging.info("Updated %s with %d rotate paths on ", vaultify_path(f), hours+days, path)
+                    logging.info("Updated %s with %d rotate paths on %s", vaultify_path(f), hours+days, path)
             write_file(f, hcl.dumps(p, indent=4))
         crawl_map(reconfigure_policy, pdir+"/*")
 
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Vault Deployer")
+    # parser.add_argument("path", help="The path you want to rotate")
+    parser.add_argument("-t", "--token", help="The vault token you want to use", default=os.getenv("VAULT_TOKEN", ""))
+    parser.add_argument("-E", "--criteo-env", help="Criteo ENV to substitute in strings", dest="env" ,default="dev")
+    parser.add_argument("-H", "--vault-addr", help="The vault server address", dest='addr',
+                        default=os.getenv("VAULT_ADDR", "https://127.0.0.1:8200"))
+    parser.add_argument("-d", "--debug", help="Enable debug logging", dest='loglevel', action="store_const",
+                        const=logging.DEBUG, default=logging.WARNING)
+    parser.add_argument("-v", "--verbose", help="Enable verbose logging", dest='loglevel', action="store_const",
+                        const=logging.INFO)
+    parser.add_argument('-B',"--no-build", help="Prevent the configuration to be builded",dest='nobuild' ,action="store_true")
+    parser.add_argument('-D', "--no-deploy", help="Prevent the configuration to be deployed", dest='nodeploy' , action="store_true")
+    args = parser.parse_args()
 
+    logging.basicConfig(level=args.loglevel, stream=sys.stdout)
 
-
-
-def main():
-    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
     default_path = os.path.dirname(__file__)
     if default_path:
-        os.chdir(default_path)
+        os.chdir(default_path+"/..")
 
     VAULT_ADDR = os.getenv('VAULT_ADDR', "http://127.0.0.1:8200")
-    VAULT_TOKEN = os.environ['VAULT_TOKEN']
     ENV = os.getenv('CRITEO_ENV', 'dev')
 
-    client = hvac.Client(url=VAULT_ADDR, token=VAULT_TOKEN)
-    assert_valid_client(client)
-
-    build_static_config(STATIC_CONF_PATH, BUILD_PATH, ctx={"env": ENV})
-
-    teams.generate_team_storage("../configurations/teams", BUILD_PATH)
-    enable_auth_backends(client, BUILD_PATH)
-    enable_secret_backends(client, BUILD_PATH)
-    generate_versionned_policies(hours=3, days=2)
-    apply_configuration(client, BUILD_PATH, cleanup=True)
-
-
-if __name__ == '__main__':
-    main()
+    if not args.nobuild:
+        build_static_config(STATIC_CONF_PATH, BUILD_PATH, ctx={"env": args.env})
+        teams.generate_team_storage("configurations/teams", BUILD_PATH)
+        generate_versionned_policies(hours=3, days=2)
+    if not args.nodeploy:
+        if not args.token:
+            logging.error("You need to provide a VAULT_TOKEN.")
+        client = hvac.Client(url=args.addr, token=args.token)
+        assert_valid_client(client)
+        enable_auth_backends(client, BUILD_PATH)
+        enable_secret_backends(client, BUILD_PATH)
+        apply_configuration(client, BUILD_PATH, cleanup=True)

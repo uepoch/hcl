@@ -5,8 +5,6 @@ cd $(git rev-parse --show-toplevel)
 set -x
 set -e
 
-if [[ ! -e ./tmp/vault ]]; then
-  ./scripts/install.sh
-fi
+./scripts/install.sh
 
 ./scripts/tests.sh || exit $?
