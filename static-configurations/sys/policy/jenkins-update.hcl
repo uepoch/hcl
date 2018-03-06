@@ -1,6 +1,13 @@
-path "auth/*" {
+path "sys/auth" {
     capabilities = [
-        "list"
+        "read"
+    ]
+}
+
+path "sys/auth/*" {
+    capabilities = [
+        "update",
+        "create"
     ]
 }
 
@@ -8,23 +15,36 @@ path "sys/policy/*" {
     capabilities = [
         "list",
         "read",
+        "update",
+        "delete",
+        "create"
     ]
 }
 
 path "sys/mounts" {
     capabilities = [
-        "list"
+        "read",
     ]
 }
 
-path "/sys/*" {
+path "sys/mounts/*" {
     capabilities = [
-        "deny"
+        "list",
+        "create",
+        "update",
+    ]
+}
+
+path "sys/*" {
+    capabilities = [
+        "list"
     ]
 }
 
 path "/*" {
     capabilities = [
+        "list",
+        "read",
         "update",
         "create",
         "delete"
