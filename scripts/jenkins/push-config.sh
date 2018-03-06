@@ -2,7 +2,7 @@
 set -e
 set -x
 
-export VAULT_ADDR=${VAULT_ADDR:-"https://vault-vault.marathon-par.central.criteo.preprod/"}
+export VAULT_ADDR=${VAULT_ADDR:-"http://vault-vault.marathon-par.central.criteo.preprod/"}
 
 if [ -z "$VAULT_TOKEN" ];then
     echo "Can't find VAULT_TOKEN in env"
