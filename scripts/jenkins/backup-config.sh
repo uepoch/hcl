@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -e
+set -x
 
 cd "$(git rev-parse --show-toplevel)"
+source ./scripts/venv.sh
 
 BACKUP_PATH="$(mktemp -d)"
 BRANCH=${BRANCH:-develop}
@@ -12,6 +14,7 @@ git clone "ssh://${GITUSER:-qabot}@review.criteois.lan:29418/identity-management
     cd $BACKUP_PATH
     git checkout "$BRANCH"
 )
+
 echo "Building the configuration"
 python app/main.py --no-deploy
 
