@@ -5,12 +5,12 @@ set -x
 cd $(git rev-parse --show-toplevel)
 source ./scripts/venv.sh
 
-if [ -n "$VAULT_ADDR" ]; then
+if [ -z "$VAULT_ADDR" ]; then
     echo "Can't find VAULT_ADDR"
     exit 2
 fi
 
-if [ -n "$VAULT_TOKEN" ];then
+if [ -z "$VAULT_TOKEN" ];then
     echo "Can't find VAULT_TOKEN in env"
 # No secret ID needed for now.
     result=$(curl -XPOST -d '{"role_id": "criteo-jenkins", "secret_id": "'$JENKINS_VAULT_SECRET_ID'"}' "$VAULT_ADDR/v1/auth/approle/login" | jq -r '.auth.client_token')
