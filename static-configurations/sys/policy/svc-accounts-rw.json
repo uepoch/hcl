@@ -1,0 +1,7 @@
+{
+  "path": {
+    "services/accounts/*": {
+      "capabilities": ["read", "list", "create"]
+    }
+  }
+}

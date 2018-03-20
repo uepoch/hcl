@@ -1,0 +1,6 @@
+{
+  "bind_secret_id": true,
+  "policies": ["default", "svc-accounts-rw"],
+  "token_num_uses": 50,
+  "token_ttl": 300
+}
