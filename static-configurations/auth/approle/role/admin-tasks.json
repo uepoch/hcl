@@ -1,0 +1,6 @@
+{
+    "policies": ["default", "admin"],
+    "token_num_uses": 0,
+    "token_ttl": 100,
+    "token_max_ttl": 600
+}
