@@ -1,15 +1,7 @@
 #!/usr/bin/env python3
 
-import logging
-import hvac
-import os
-import yaml
-import sys
-import hcl
-import glob
-
-from helper import *
-from main import VAULT_POLICIES_PATH
+from criteo.vault.config.helpers import *
+from criteo.vault.config.variables.vault import VAULT_POLICIES_PATH
 
 LDAP_BACKEND_PATH = "ldap/"
 LDAP_PATH = "../auth/" + LDAP_BACKEND_PATH

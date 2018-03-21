@@ -10,6 +10,20 @@ import glob2
 import glob
 
 
+def go_vcs_root(test, dirs=(".git",), default=None):
+    prev, test = None, os.path.abspath(test)
+    while prev != test:
+        if any(os.path.isdir(os.path.join(test, d)) for d in dirs):
+            os.chdir(test)
+            return test
+        prev, test = test, os.path.abspath(os.path.join(test, os.pardir))
+    if not default:
+        raise Exception("Can't find root directory, please run inside the directory or give a default value")
+    else:
+        logging.info("Can't find VCS root. Fallbacking to {}".format(default))
+    return default
+
+
 def vaultify_path(path):
     return "/".join(path.split("/")[1:])
 

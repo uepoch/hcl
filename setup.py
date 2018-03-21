@@ -22,7 +22,8 @@ setuptools.setup(
     dependency_links=[],
     entry_points={
         'console_scripts': [
-            'run-app.pex = app.main:main',
+            'app = criteo.vault.config.app.main:main',
+            'rotate_kv = criteo.vault.config.rotate_kv:main'
         ],
     },
     data_files=[('.', ['requirements.txt', 'tests-requirements.txt'])],
