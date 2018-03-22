@@ -1,5 +1,4 @@
 import os
-import json
 import logging
 import hcl
 import jinja2
@@ -7,7 +6,6 @@ import yaml
 
 # TODO: Use glob standard package when devtools upgrade python to 3.5
 import glob2
-import glob
 
 
 def go_vcs_root(test, dirs=(".git",), default=None):
@@ -60,6 +58,7 @@ def crawl_map(fn, *patterns):
         for f in sorted(new_entries):
             fn(f)
 
+
 def assert_valid_client(client):
     assert client.is_authenticated()
     assert client.is_initialized()
@@ -73,7 +72,7 @@ def add_policy_to_ldap_entity_file(file_path, *policy_names, prefix_cleanup=None
         logging.debug("Successfully created %s and assigned %s to it", file_path, policy_names)
     else:
         if prefix_cleanup:
-            entity["policies"] = [x for x in p if not x.startswith(prefix_cleanup)]
+            entity["policies"] = [x for x in entity["policies"] if not x.startswith(prefix_cleanup)]
         entity["policies"] += policy_names
         entity["policies"] = list(set(entity["policies"]))
         write_file(file_path, hcl.dumps(entity, indent=4))

@@ -5,11 +5,11 @@ import sys
 import shutil
 
 import argparse
+import shutil
+import sys
 
-from criteo.vault.config.helpers import *
 from criteo.vault.config.app.teams import *
 from criteo.vault.config.variables.vault import *
-
 
 
 def enable_auth_backends(client, conf_dir):
@@ -23,7 +23,7 @@ def enable_auth_backends(client, conf_dir):
 def enable_secret_backends(client, conf_dir):
     remote_backends = client.list_secret_backends()
     for local_backend, conf in [(get_name(os.path.basename(x)), parse(x)) for x in
-                          glob.glob("{}/{}/*".format(conf_dir, VAULT_MOUNTS_PATH))]:
+                                glob.glob("{}/{}/*".format(conf_dir, VAULT_MOUNTS_PATH))]:
         backend_path = local_backend + "/"
         if backend_path in remote_backends:
             orig = remote_backends[backend_path]
@@ -102,11 +102,12 @@ def apply_configuration(client, conf_dir, cleanup=True):
 
     crawl_map(apply_then_cleanup, conf_dir + "sys/*", conf_dir + "/*")
 
+
 def generate_versionned_policies(hours=3, days=2):
     pdir = BUILD_PATH + VAULT_POLICIES_PATH
     mdir = BUILD_PATH + VAULT_MOUNTS_PATH
     KVs = []
-    for f in glob.glob(mdir+'/*'):
+    for f in glob.glob(mdir + '/*'):
         logging.debug("Checking if %s is a KV mount", f)
         mount = parse(f)
         if mount.get("type", "") == "kv":
@@ -115,34 +116,40 @@ def generate_versionned_policies(hours=3, days=2):
 
     if len(KVs) > 0:
         logging.info("Found some KV mount-point to rotate: %s", KVs)
+
         def reconfigure_policy(f):
             p = parse(f)
             logging.debug("Searching in %s", f)
             for path, capabilities in list(p.get("path", {}).items()):
                 mount_point = path.split('/')[0]
                 if mount_point in KVs:
-                    for i in range(1, hours+1):
-                        p["path"][path.replace(mount_point, mount_point+VAULT_ROTATE_SUFFIX_FORMAT.format(unit=VAULT_ROTATE_SUFFIX_UNIT_HOURS, number=i))] = capabilities
-                    for i in range(1, days+1):
-                        p["path"][path.replace(mount_point, mount_point+VAULT_ROTATE_SUFFIX_FORMAT.format(unit=VAULT_ROTATE_SUFFIX_UNIT_DAYS, number=i))] = capabilities
-                    logging.info("Updated %s with %d rotate paths on %s", vaultify_path(f), hours+days, path)
+                    for i in range(1, hours + 1):
+                        p["path"][path.replace(mount_point, mount_point + VAULT_ROTATE_SUFFIX_FORMAT.format(
+                            unit=VAULT_ROTATE_SUFFIX_UNIT_HOURS, number=i))] = capabilities
+                    for i in range(1, days + 1):
+                        p["path"][path.replace(mount_point, mount_point + VAULT_ROTATE_SUFFIX_FORMAT.format(
+                            unit=VAULT_ROTATE_SUFFIX_UNIT_DAYS, number=i))] = capabilities
+                    logging.info("Updated %s with %d rotate paths on %s", vaultify_path(f), hours + days, path)
             write_file(f, hcl.dumps(p, indent=4))
-        crawl_map(reconfigure_policy, pdir+"/*")
+
+        crawl_map(reconfigure_policy, pdir + "/*")
 
 
 def main():
     parser = argparse.ArgumentParser(description="Vault Deployer")
     # parser.add_argument("path", help="The path you want to rotate")
     parser.add_argument("-t", "--token", help="The vault token you want to use", default=os.getenv("VAULT_TOKEN", ""))
-    parser.add_argument("-E", "--criteo-env", help="Criteo ENV to substitute in strings", dest="env" ,default="dev")
+    parser.add_argument("-E", "--criteo-env", help="Criteo ENV to substitute in strings", dest="env", default="dev")
     parser.add_argument("-H", "--vault-addr", help="The vault server address", dest='addr',
                         default=os.getenv("VAULT_ADDR", "https://127.0.0.1:8200"))
     parser.add_argument("-d", "--debug", help="Enable debug logging", dest='loglevel', action="store_const",
                         const=logging.DEBUG, default=logging.WARNING)
     parser.add_argument("-v", "--verbose", help="Enable verbose logging", dest='loglevel', action="store_const",
                         const=logging.INFO)
-    parser.add_argument('-B',"--no-build", help="Prevent the configuration to be builded",dest='nobuild' ,action="store_true")
-    parser.add_argument('-D', "--no-deploy", help="Prevent the configuration to be deployed", dest='nodeploy' , action="store_true")
+    parser.add_argument('-B', "--no-build", help="Prevent the configuration to be builded", dest='nobuild',
+                        action="store_true")
+    parser.add_argument('-D', "--no-deploy", help="Prevent the configuration to be deployed", dest='nodeploy',
+                        action="store_true")
     args = parser.parse_args()
 
     logging.basicConfig(level=args.loglevel, stream=sys.stdout)
@@ -161,6 +168,7 @@ def main():
         enable_auth_backends(client, BUILD_PATH)
         enable_secret_backends(client, BUILD_PATH)
         apply_configuration(client, BUILD_PATH, cleanup=True)
+
 
 if __name__ == '__main__':
     main()

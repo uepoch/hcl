@@ -24,24 +24,27 @@ def vault_dump(source, dest):
             logging.debug("Found a value in %s", source + path)
             client.write(dest + path, **client.read(source + path)['data'])
 
+
 def rotateBackends(backends=None):
-    if not backends: return
-    l = max([int(re.findall('[0-9]+', x)[0]) for x in backends])
-    for i in range(l, 0, -1):
+    if not backends:
+        return
+    length = max([int(re.findall('[0-9]+', x)[0]) for x in backends])
+    for i in range(length, 0, -1):
         old = args.format.format(path=args.path.strip('/'), index=i, unit=args.unit)
         new = args.format.format(path=args.path.strip('/'), index=i + 1, unit=args.unit)
         if i >= args.keep_last:
             try:
                 logging.info("Destroying %s", old)
                 client.disable_secret_backend(old)
-            except:
+            except Exception:
                 logging.warning("Failed to destroy %s", old)
         else:
             try:
                 logging.info("Rotating %s to %s", old, new)
                 client.remount_secret_backend(old, new)
-            except:
+            except Exception:
                 logging.warning("Failed to rotate %s", old)
+
 
 def main():
     parser = argparse.ArgumentParser(description="Simple script to rotate a vault kv backend")
@@ -85,12 +88,14 @@ def main():
         if v['type'] != 'kv':
             invalidBackend = True
             logging.error("Backend %s invalid type: %s", k, v['type'])
-    if invalidBackend: exit(2)
+    if invalidBackend:
+        exit(2)
     rotateBackends(list(addBackends.keys()))
     newBackend = args.format.format(path=args.path.strip('/'), index=1, unit=args.unit)
     client.enable_secret_backend('kv', "Created at {}".format(datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")),
                                  newBackend)
     vault_dump(args.path, newBackend)
+
 
 if __name__ == '__main__':
     main()

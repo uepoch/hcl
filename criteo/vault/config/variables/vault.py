@@ -1,5 +1,3 @@
-from hvac import Client
-
 STATIC_CONF_PATH = "static-configurations"
 BUILD_PATH = "build/"
 

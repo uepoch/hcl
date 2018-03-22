@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import glob
 from criteo.vault.config.helpers import *
 from criteo.vault.config.variables.vault import VAULT_POLICIES_PATH
 
@@ -40,7 +41,7 @@ def compile_ACLs(_dir):
     if len(acl_files) > 1:
         raise Exception("You can't have more than one ACL file in {}", _dir)
     elif len(acl_files) == 0:
-        #No ACL found, go deeper
+        # No ACL found, go deeper
         return subpaths
     else:
         return [{"roles": parse(acl_files[0]), "path": vaultify_path(_dir),
