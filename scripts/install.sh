@@ -18,10 +18,19 @@ if command -v vault > /dev/null && [ "$(vault version | awk '{print $2}')" == "v
     fi
 
 elif ! [ -x "./vault" ] || ! [ "$(./vault version | awk '{print $2}')" == "v${vault_version}" ]; then
-    url="http://nexus.query.consul/service/local/repo_groups/criteo/content/com/github/hashicorp/vault"
-    archive="vault-${vault_version}.tar.gz"
-    if ! [ -f archive ]; then
-        wget "${url}/${vault_version}/${archive}"
+    ARCH="386"
+    if [ "$(getconf LONG_BIT)" -eq 64 ]; then
+        ARCH="amd64"
     fi
-    tar xvf "${archive}"
+    OS="linux"
+    if [ "$(uname -s)" == "Darwin" ]; then
+        OS="darwin"
+    fi
+    ARCHIVE_NAME="vault_${vault_version}_${OS}_${ARCH}.zip"
+    url="https://releases.hashicorp.com/vault/${vault_version}/${ARCHIVE_NAME}"
+    if ! [ -f archive ]; then
+        wget "${url}"
+    fi
+    unzip -o "./${ARCHIVE_NAME}"
+    chmod +x ./vault
 fi
