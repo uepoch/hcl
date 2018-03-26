@@ -1,7 +1,10 @@
 {
-    "bind_secret_id": false,
-    "bound_cidr_list": "10.0.0.0/8",
-    "policies": ["default", "jenkins-update"],
-    "token_num_uses": 4096,
-    "token_ttl": 300
+  "policies": [
+    "default",
+    "jenkins-update"
+  ],
+  "bind_secret_id": false,
+  "bound_cidr_list": "10.0.0.0/8",
+  "token_num_uses": 4096,
+  "token_ttl": 300
 }

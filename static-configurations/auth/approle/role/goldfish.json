@@ -1,0 +1,10 @@
+{
+  "policies": [
+    "default",
+    "goldfish"
+  ],
+  "secret_id_num_uses": 1,
+  "secret_id_ttl": "5m",
+  "period": "24h",
+  "token_num_uses": 50000
+}
