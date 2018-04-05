@@ -1,7 +1,15 @@
 {
   "path": {
     "teams/": {
-      "capabilities": ["read", "list"]
+      "capabilities": [
+        "read",
+        "list"
+      ]
+    },
+    "teams/metadata/": {
+      "capabilities": [
+        "list"
+      ]
     }
   }
 }

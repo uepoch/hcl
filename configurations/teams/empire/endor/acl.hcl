@@ -1,4 +1,4 @@
-rw {
+admin {
 	users = ["d.vador"]
 }
 

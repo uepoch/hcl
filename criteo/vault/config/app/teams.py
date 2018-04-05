@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 
 import glob
+import copy
 from criteo.vault.config.helpers import *
-from criteo.vault.config.variables.vault import VAULT_POLICIES_PATH
+from criteo.vault.config.variables.vault import VAULT_POLICIES_PATH, VAULT_VERSIONNED_KV_DATA, \
+    VAULT_VERSIONNED_KV_METADATA, VAULT_VERSIONNED_KV_DELETE, VAULT_VERSIONNED_KV_DESTROY, VAULT_VERSIONNED_KV_UNDELETE, \
+    VAULT_VERSIONNED_KV_KEYWORDS
 
 LDAP_BACKEND_PATH = "ldap/"
 LDAP_PATH = "../auth/" + LDAP_BACKEND_PATH
@@ -13,10 +16,11 @@ ACL_GRANTERS = ['users', 'groups']
 
 RO_RIGHTS = {"capabilities": ["read", "list"]}
 RW_RIGHTS = {"capabilities": RO_RIGHTS['capabilities'] + ['update', 'create', 'delete']}
+ADMIN_RIGHTS = {"capabilities": RW_RIGHTS['capabilities'] + ['sudo']}
 NO_RIGHTS = {"capabilities": []}
 TEAM_POLICY_PREFIX = "__team_policy"
 
-DEFAULT_ROLES = {"ro": RO_RIGHTS, "rw": RW_RIGHTS}
+DEFAULT_ROLES = {"ro": RO_RIGHTS, "rw": RW_RIGHTS, "admin": ADMIN_RIGHTS}
 
 
 # TODO(m.conraux): Other part of the code supports custom role, should adapt the validator
@@ -53,22 +57,62 @@ def generate_policy_name(path, role):
     return "{}_{}_{}".format(TEAM_POLICY_PREFIX.lower(), path, role).replace('/', '_')
 
 
+# Hide complexity for users when dealing with metadatas
+def generate_rights(path, rights):
+    ret = {}
+    cs = rights["capabilities"]
+    mount, *rest = path.split("/")
+    fmt = "{mount}/{special}/{rest}/*"
+    paths = {}
+    for key in VAULT_VERSIONNED_KV_KEYWORDS:
+        paths[key] = fmt.format(mount=mount, rest='/'.join(rest), special=key)
+        ret[paths[key]] = copy.deepcopy(rights)
+        ret[paths[key]]["capabilities"] = []
+    if "deny" in cs:
+        logging.error("- deny keyword not supported for path: {}".format(path))
+        exit(2)
+    sudo = "sudo" in cs
+    if "list" in cs:
+        ret[paths[VAULT_VERSIONNED_KV_METADATA]]["capabilities"].append("list")
+    if "read" in cs and sudo:
+        ret[paths[VAULT_VERSIONNED_KV_METADATA]]["capabilities"].append("read")
+    if "delete" in cs and sudo:
+        ret[paths[VAULT_VERSIONNED_KV_METADATA]]["capabilities"].append("delete")
+        ret[paths[VAULT_VERSIONNED_KV_DELETE]]["capabilities"].append("update")
+        ret[paths[VAULT_VERSIONNED_KV_DESTROY]]["capabilities"].append("update")
+        if "read" in cs:
+            ret[paths[VAULT_VERSIONNED_KV_UNDELETE]]["capabilities"].append("update")
+    for keyword in ("read", "update", "delete", "create", "list"):
+        if keyword in cs:
+            ret[paths[VAULT_VERSIONNED_KV_DATA]]["capabilities"].append(keyword)
+    return ret
+
+
 def generate_policies(acl):
     for k, role in acl["roles"].items():
         r = NO_RIGHTS
+        if k in DEFAULT_ROLES:
+            r = DEFAULT_ROLES[k]
         if "rights" in role:
             logging.info("Found custom rights for role %s in %s", k, acl["path"])
             if type(role["rights"]) is not dict:
                 logging.warning("- Invalid role definition. It's not a dict")
+            elif "capabilities" not in role["rights"]:
+                logging.warning("- You have to specify at least one capability. Fallbacking to default roles")
             elif "capabilities" in role["rights"] and type(role["rights"]["capabilities"]) is not list:
                 logging.warning("- Capabilities are not a list. Fallbacking to default roles")
+            # TODO: Remove when better understanding of versionned KV internals. Advanced feature that shouldn't be used for now
+            elif len(role["rights"].keys()) > 1:
+                logging.error(
+                    "- Only capabilities are supported as of now. If you have a special request, feel free to ping IDM")
+                # I'm exiting to preserve secrets in case of misusage in the metadata path
+                exit(2)
             else:
                 r = role["rights"]
-        elif k in DEFAULT_ROLES:
-            r = DEFAULT_ROLES[k]
-        main = {"path": {acl["path"] + "/*": r}}
-        denied_paths = {x["path"] + "/*": NO_RIGHTS for x in acl["subpaths"]}
-        main["path"].update(denied_paths)
+
+        main = {"path": generate_rights(acl['path'], r)}
+        for denied_path in acl["subpaths"]:
+            main["path"].update(generate_rights(denied_path["path"], NO_RIGHTS))
         yield (generate_policy_name(acl["path"], k), k, main)
 
 

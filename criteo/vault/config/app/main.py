@@ -103,41 +103,8 @@ def apply_configuration(client, conf_dir, cleanup=True):
     crawl_map(apply_then_cleanup, conf_dir + "sys/*", conf_dir + "/*")
 
 
-def generate_versionned_policies(hours=3, days=2):
-    pdir = BUILD_PATH + VAULT_POLICIES_PATH
-    mdir = BUILD_PATH + VAULT_MOUNTS_PATH
-    KVs = []
-    for f in glob.glob(mdir + '/*'):
-        logging.debug("Checking if %s is a KV mount", f)
-        mount = parse(f)
-        if mount.get("type", "") == "kv":
-            KVs.append(os.path.basename(get_name(f)))
-            logging.debug("- Adding it to the list")
-
-    if len(KVs) > 0:
-        logging.info("Found some KV mount-point to rotate: %s", KVs)
-
-        def reconfigure_policy(f):
-            p = parse(f)
-            logging.debug("Searching in %s", f)
-            for path, capabilities in list(p.get("path", {}).items()):
-                mount_point = path.split('/')[0]
-                if mount_point in KVs:
-                    for i in range(1, hours + 1):
-                        p["path"][path.replace(mount_point, mount_point + VAULT_ROTATE_SUFFIX_FORMAT.format(
-                            unit=VAULT_ROTATE_SUFFIX_UNIT_HOURS, number=i))] = capabilities
-                    for i in range(1, days + 1):
-                        p["path"][path.replace(mount_point, mount_point + VAULT_ROTATE_SUFFIX_FORMAT.format(
-                            unit=VAULT_ROTATE_SUFFIX_UNIT_DAYS, number=i))] = capabilities
-                    logging.info("Updated %s with %d rotate paths on %s", vaultify_path(f), hours + days, path)
-            write_file(f, hcl.dumps(p, indent=4))
-
-        crawl_map(reconfigure_policy, pdir + "/*")
-
-
 def main():
     parser = argparse.ArgumentParser(description="Vault Deployer")
-    # parser.add_argument("path", help="The path you want to rotate")
     parser.add_argument("-t", "--token", help="The vault token you want to use", default=os.getenv("VAULT_TOKEN", ""))
     parser.add_argument("-E", "--criteo-env", help="Criteo ENV to substitute in strings", dest="env", default="dev")
     parser.add_argument("-H", "--vault-addr", help="The vault server address", dest='addr',
@@ -159,7 +126,6 @@ def main():
     if not args.nobuild:
         build_static_config(STATIC_CONF_PATH, BUILD_PATH, ctx={"env": args.env})
         generate_team_storage("configurations/teams", BUILD_PATH)
-        generate_versionned_policies(hours=3, days=2)
     if not args.nodeploy:
         if not args.token:
             logging.error("You need to provide a VAULT_TOKEN.")
