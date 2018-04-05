@@ -1,3 +1,3 @@
 {
-  "policies": ["teams_list", "default"]
+  "policies": ["teams_list", "ui", "default"]
 }
