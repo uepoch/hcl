@@ -53,3 +53,5 @@ else
   echo "or test connection with (unset VAULT_TOKEN before):"
   echo "  vault auth -method=ldap username=<criteo_login>"
 fi
+
+tox -e lint

@@ -18,7 +18,7 @@ setuptools.setup(
     name='vault-configuration',
     version='0.1',
     install_requires=_INSTALL_REQUIRES,
-    tests_require=_read_reqs("tests-requirements.txt"),
+    extras_require={'test': _read_reqs("tests-requirements.txt")},
     dependency_links=[],
     entry_points={
         'console_scripts': [

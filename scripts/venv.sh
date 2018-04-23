@@ -12,5 +12,5 @@ if [[ ! -n ${VIRTUAL_ENV} ]]; then
 
     pip install -q --upgrade pip
     pip install -q --upgrade setuptools
-    pip install -q -e .
+    pip install -q -e '.[test]'
 fi
