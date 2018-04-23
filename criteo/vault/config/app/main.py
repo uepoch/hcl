@@ -60,8 +60,9 @@ def build_static_config(input_dir, output_dir, template=True, ctx=None):
             if not os.path.exists(outfile):
                 os.mkdir(outfile)
             return
-        elif get_extension(file) is ".template" and template is True:
+        elif get_extension(file) == ".template" and template is True:
             content = render_template(file, ctx)
+            outfile = outfile.replace(".template", "")
             logging.info("Rendering %s", file)
         else:
             content = read_file(file)
@@ -99,14 +100,13 @@ def apply_configuration(client, conf_dir, cleanup=True):
         for subdir in dirs:
             logging.debug("Entering %s", subdir)
             apply_then_cleanup(subdir)
-
     crawl_map(apply_then_cleanup, conf_dir + "sys/*", conf_dir + "/*")
 
 
 def main():
     parser = argparse.ArgumentParser(description="Vault Deployer")
     parser.add_argument("-t", "--token", help="The vault token you want to use", default=os.getenv("VAULT_TOKEN", ""))
-    parser.add_argument("-E", "--criteo-env", help="Criteo ENV to substitute in strings", dest="env", default="dev")
+    parser.add_argument("-E", "--criteo-env", help="Criteo ENV to substitute in strings", dest="env", default="preprod")
     parser.add_argument("-H", "--vault-addr", help="The vault server address", dest='addr',
                         default=os.getenv("VAULT_ADDR", "https://127.0.0.1:8200"))
     parser.add_argument("-d", "--debug", help="Enable debug logging", dest='loglevel', action="store_const",

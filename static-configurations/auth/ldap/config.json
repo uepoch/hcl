@@ -1,8 +1,0 @@
-{
-    "url": "ldap://uadpreprod.preprod.crto.in",
-    "userdn": "OU=FIMUsers,DC=uadpreprod,DC=preprod,DC=crto,DC=in",
-    "groupdn": "OU=FIMGroups,DC=uadpreprod,DC=preprod,DC=crto,DC=in",
-    "insecure_tls": false,
-    "groupfilter": "(&(objectClass=group)(member:1.2.840.113556.1.4.1941:={{.UserDN}}))",
-    "upndomain": "uadpreprod.preprod.crto.in"
-}
