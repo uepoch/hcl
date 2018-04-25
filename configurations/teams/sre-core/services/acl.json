@@ -1,0 +1,10 @@
+{
+	"admin": {
+		"users": ["g.seux"]
+	},
+	"rw": {
+		"groups": [
+			"gu-sre-core-services"
+		]
+	}
+}

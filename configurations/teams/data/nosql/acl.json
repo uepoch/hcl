@@ -1,0 +1,10 @@
+{
+	"admin": {
+		"users": ["p.mavro"]
+	},
+	"rw": {
+		"groups": [
+			"gu-sre-nosql"
+		]
+	}
+}

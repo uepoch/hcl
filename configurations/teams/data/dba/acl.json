@@ -1,0 +1,10 @@
+{
+	"admin": {
+		"users": ["s.roblin"]
+	},
+	"rw": {
+		"groups": [
+			"Gu-Dba"
+		]
+	}
+}

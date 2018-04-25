@@ -1,0 +1,8 @@
+{
+	"admin": {
+		"users": [ "j.mauro" ]
+	},
+	"rw": {
+		"groups": ["gu-sre-core-infra"]
+	}
+}
