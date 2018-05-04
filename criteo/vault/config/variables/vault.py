@@ -4,6 +4,8 @@ BUILD_PATH = "build/"
 VAULT_MOUNTS_PATH = "sys/mounts"
 VAULT_POLICIES_PATH = "sys/policy"
 
+VAULT_TEAMS_MOUNT = "teams/"
+
 VAULT_DATA_KEY = "data"
 
 VAULT_ROTATE_SUFFIX_UNIT_DAYS = "d"

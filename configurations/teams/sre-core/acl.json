@@ -1,7 +1,5 @@
 {
-	"admin": {
-      "groups": [
-        "Gu-Sre-Core"
-      ]
-    }
+	"rw": {
+		"groups": ["Gu-Sre-Core"]
+	}
 }

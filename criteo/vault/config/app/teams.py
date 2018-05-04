@@ -5,7 +5,7 @@ import copy
 from criteo.vault.config.helpers import *
 from criteo.vault.config.variables.vault import VAULT_POLICIES_PATH, VAULT_VERSIONNED_KV_DATA, \
     VAULT_VERSIONNED_KV_METADATA, VAULT_VERSIONNED_KV_DELETE, VAULT_VERSIONNED_KV_DESTROY, VAULT_VERSIONNED_KV_UNDELETE, \
-    VAULT_VERSIONNED_KV_KEYWORDS
+    VAULT_VERSIONNED_KV_KEYWORDS, VAULT_TEAMS_MOUNT
 
 LDAP_BACKEND_PATH = "ldap/"
 LDAP_PATH = "../auth/" + LDAP_BACKEND_PATH
@@ -48,8 +48,12 @@ def compile_ACLs(_dir):
         # No ACL found, go deeper
         return subpaths
     else:
-        return [{"roles": parse(acl_files[0]), "path": vaultify_path(_dir),
-                 "subpaths": subpaths}]
+        try:
+            return [{"roles": parse(acl_files[0]), "path": vaultify_path(_dir),
+                     "subpaths": subpaths}]
+        except Exception as e:
+            logging.error("An error occured during the parsing of {}: {}".format(acl_files[0], e))
+            exit(2)
 
 
 # Stupid ATM, but here for convenience
@@ -59,7 +63,8 @@ def generate_policy_name(path, role):
 
 # Hide complexity for users when dealing with metadatas
 def generate_rights(path, rights):
-    ret = {}
+    # Legacy KV
+    ret = {path: rights}
     cs = rights["capabilities"]
     mount, *rest = path.split("/")
     fmt = "{mount}/{special}/{rest}/*"

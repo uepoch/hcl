@@ -1,0 +1,15 @@
+{
+  "path": {
+    "auth/approle/role/sudoer/secret-id": {
+      "capabilities": [
+        "update",
+        "create"
+      ]
+    },
+    "auth/approle/role/sudoer/role-id": {
+      "capabilities": [
+        "read"
+      ]
+    }
+  }
+}
