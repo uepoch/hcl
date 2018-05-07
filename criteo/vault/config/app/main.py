@@ -54,7 +54,7 @@ def build_static_config(input_dir, output_dir, template=True, ctx=None):
         os.mkdir(output_dir)
 
     def build_file(file=""):
-        outfile = file.replace(input_dir, output_dir)
+        outfile = file.replace(input_dir, output_dir).lower()
         content = ""
         if os.path.isdir(file):
             if not os.path.exists(outfile):

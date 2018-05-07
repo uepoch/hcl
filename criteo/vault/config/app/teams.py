@@ -131,7 +131,7 @@ def generate_files(ACLs, output_dir):
             write_file(policy_file, hcl.dumps(policy, indent=4))
             logging.info("Generated %s team policy", name)
             logging.debug("With content: %s", policy_file)
-            for entity in ["{}/{}".format(entityType, name) for entityType in acl["roles"][role] for name in
+            for entity in ["{}/{}".format(entityType, name.lower()) for entityType in acl["roles"][role] for name in
                            acl["roles"][role][entityType]]:
                 add_policy_to_ldap_entity_file("{}/auth/ldap/{}.json".format(output_dir, entity), name)
             ret.append(name)
