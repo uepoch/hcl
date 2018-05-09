@@ -65,6 +65,7 @@ def generate_policy_name(path, role):
 def generate_rights(path, rights):
     # Legacy KV
     ret = {path: rights}
+    ret[path + '/*'] = rights
     cs = rights["capabilities"]
     mount, *rest = path.split("/")
     fmt = "{mount}/{special}/{rest}/*"
