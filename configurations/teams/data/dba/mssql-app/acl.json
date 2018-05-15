@@ -1,0 +1,16 @@
+{
+	"admin": {
+		"users": ["s.roblin","k.hodin","P.Antunes","B.Reiter","m.conraux","P.Goncalves", "N.Benoit "]
+	},
+	"rw": {
+		"groups": [
+			"Gu-Dba"
+		]
+	},
+	"ro": {
+		"users": [
+			"e.moutarde",
+			"g.legoux"
+		]
+	}
+}
