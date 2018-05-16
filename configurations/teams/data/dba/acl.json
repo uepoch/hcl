@@ -1,10 +1,12 @@
 {
-	"admin": {
-		"users": ["s.roblin"]
-	},
-	"rw": {
-		"groups": [
-			"Gu-Dba"
-		]
-	}
+  "admin": {
+    "users": [
+      "s.roblin"
+    ]
+  },
+  "rw": {
+    "groups": [
+      "Gu-Dba"
+    ]
+  }
 }

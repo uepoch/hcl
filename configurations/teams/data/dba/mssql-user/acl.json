@@ -1,25 +1,33 @@
 {
-	"admin": {
-		"users": ["s.roblin","k.hodin","P.Antunes","B.Reiter","m.conraux","P.Goncalves", "N.Benoit "]
-	},
-	"rw": {
-		"groups": [
-			"Gu-Dba",
-			"Gu-sre-core-infra",
-			"Gu-sre-core-services"
-		]
-	},
-	"ro": {
-		"users": [
-			"A.Chong",
-			"O.Tharan",
-			"P.Beauhaire",
-			"P.Cheynier",
-			"R.Hanna",
-			"Ya.Zhang",
-			"C.Hauber",
-			"G.Legoux",
-			"n.Djadi"
-		]
-	}
+  "admin": {
+    "users": [
+      "s.roblin",
+      "k.hodin",
+      "p.antunes",
+      "b.reiter",
+      "m.conraux",
+      "p.goncalves",
+      "n.benoit"
+    ]
+  },
+  "rw": {
+    "groups": [
+      "Gu-Dba",
+      "gu-sre-core-infra",
+      "gu-sre-core-services"
+    ]
+  },
+  "ro": {
+    "users": [
+      "a.chong",
+      "o.tharan",
+      "p.beauhaire",
+      "p.cheynier",
+      "r.hanna",
+      "ya.zhang",
+      "c.hauber",
+      "g.legoux",
+      "n.djadi"
+    ]
+  }
 }
