@@ -1,8 +1,6 @@
 {
 	"rw": {
-		"groups": ["Gu-Sre-Core"]
-	},
-	"ro": {
+		"groups": ["Gu-Sre-Core"],
 		"users": ["n.helleringer"]
 	}
 }
