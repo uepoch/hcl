@@ -73,18 +73,18 @@ def build_static_config(input_dir, output_dir, template=True, ctx=None):
 
 
 def apply_configuration(client, conf_dir, cleanup=True):
-    def apply_then_cleanup(dir):
-        all = glob.glob(dir + "/*")
-        dirs = [x for x in all if os.path.isdir(x)]
-        configs = [(vaultify_path(get_name(x)), parse(x)) for x in all if x not in dirs]
-        old_configs = client.list(vaultify_path(dir)) or []
-        if not os.path.exists(dir + "/.noupdate"):
+    def apply_then_cleanup(folder):
+        resources = glob.glob(folder + "/*")
+        dirs = [x for x in resources if os.path.isdir(x)]
+        configs = [(vaultify_path(get_name(x)), parse(x)) for x in resources if x not in dirs]
+        old_configs = client.list(vaultify_path(folder)) or []
+        if not os.path.exists(folder + "/.noupdate"):
             if VAULT_DATA_KEY in old_configs:
-                old_configs = [vaultify_path(dir + "/" + x) for x in old_configs[VAULT_DATA_KEY]["keys"]]
+                old_configs = [vaultify_path(folder + "/" + x) for x in old_configs[VAULT_DATA_KEY]["keys"]]
                 logging.debug("Existing configs in vault: %s", old_configs)
                 # We can't touch it, it's hardcoded, it sucks.
-                if vaultify_path(dir) == VAULT_POLICIES_PATH:
-                    old_configs.remove(vaultify_path(dir + "/root"))
+                if vaultify_path(folder) == VAULT_POLICIES_PATH:
+                    old_configs.remove(vaultify_path(folder + "/root"))
             for path, config in configs:
                 logging.info("Updating %s", path)
                 if path.startswith(VAULT_POLICIES_PATH):
@@ -93,7 +93,7 @@ def apply_configuration(client, conf_dir, cleanup=True):
                     client.write(path, **config)
                 if path in old_configs:
                     old_configs.remove(path)
-            if cleanup is True and not os.path.exists(dir + "/.nocleanup"):
+            if cleanup is True and not os.path.exists(folder + "/.nocleanup"):
                 for config in old_configs:
                     logging.info("Deleting %s", config)
                     client.delete(config)
