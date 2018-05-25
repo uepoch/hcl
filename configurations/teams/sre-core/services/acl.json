@@ -4,7 +4,8 @@
 	},
 	"rw": {
 		"groups": [
-			"gu-sre-core-services"
+			"gu-sre-core-services",
+			"gu-core-services"
 		]
 	}
 }
