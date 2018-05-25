@@ -18,6 +18,7 @@ RO_RIGHTS = {"capabilities": ["read", "list"]}
 RW_RIGHTS = {"capabilities": RO_RIGHTS['capabilities'] + ['update', 'create', 'delete']}
 ADMIN_RIGHTS = {"capabilities": RW_RIGHTS['capabilities'] + ['sudo']}
 NO_RIGHTS = {"capabilities": []}
+LO_RIGHTS = {"capabilities": ["list"]}
 TEAM_POLICY_PREFIX = "__team_policy"
 
 DEFAULT_ROLES = {"ro": RO_RIGHTS, "rw": RW_RIGHTS, "admin": ADMIN_RIGHTS}
@@ -96,6 +97,8 @@ def generate_rights(path, rights):
 
 def generate_policies(acl):
     for k, role in acl["roles"].items():
+        if k == "options":
+            continue
         r = NO_RIGHTS
         if k in DEFAULT_ROLES:
             r = DEFAULT_ROLES[k]
@@ -116,9 +119,12 @@ def generate_policies(acl):
             else:
                 r = role["rights"]
 
-        main = {"path": generate_rights(acl['path'], r)}
+        main = {"path": generate_rights(acl["path"], r)}
         for denied_path in acl["subpaths"]:
-            main["path"].update(generate_rights(denied_path["path"], NO_RIGHTS))
+            if "options" in acl["roles"] and acl["roles"]["options"].get("listing", True):
+                main["path"].update(generate_rights(denied_path["path"], NO_RIGHTS))
+            else:
+                main["path"].update(generate_rights(denied_path["path"], LO_RIGHTS))
         yield (generate_policy_name(acl["path"], k), k, main)
 
 

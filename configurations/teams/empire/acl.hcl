@@ -1,3 +1,6 @@
 rw {
-	groups = ["gu-empire"]
+	groups = ["gu-empire", "gu-idm"]
+}
+options {
+	listing = true
 }
