@@ -3,6 +3,6 @@
 		"users": [ "j.mauro" ]
 	},
 	"rw": {
-		"groups": ["gu-sre-core-infra"]
+		"groups": ["gu-core-infra"]
 	}
 }
