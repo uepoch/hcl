@@ -1,0 +1,3 @@
+admin {
+	groups = ["gu-observability"]
+}
