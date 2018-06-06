@@ -20,10 +20,13 @@ start_vault() {
   chmod 400 vault.pid
   echo "${addr}" > vault.addr
   local pid="$(cat ./vault.pid)"
-  until VAULT_ADDR=http://${addr} ./vault status; do
-    >&2 echo "vault server is inaccessible!"
+  local i=0
+  local limit=${RETRY_LIMIT:-10}
+  until VAULT_ADDR=http://${addr} ./vault status || [ $((i++)) -ge $limit ]; do
+    >&2 echo "Retry:$i/$limit vault server is inaccessible!"
         sleep 2
   done
+  if [[ $i -ge $limit ]]; then echo >&2 "Error: Can't find running vault instance, please relaunch or contact IDM"; exit 2; fi
   echo "vault pid: ${pid} started at ${vault_addr}, see vault.log."
   echo "vault token: ${VAULT_TOKEN}"
 }
