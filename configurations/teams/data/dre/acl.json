@@ -1,0 +1,12 @@
+{
+  "admin": {
+    "users": [
+      "j.coffey"
+    ]
+  },
+  "rw": {
+    "groups": [
+      "Gu-Analytics"
+    ]
+  }
+}

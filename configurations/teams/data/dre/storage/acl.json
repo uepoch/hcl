@@ -1,0 +1,24 @@
+{
+  "admin": {
+    "users": [
+      "f.jehl",
+      "r.claude",
+      "sz.ho",
+      "a.mazurov",
+      "p.lacave",
+      "p.szostek",
+      "a.pons",
+      "h.jakobsson",
+      "p.narang"
+    ]
+  },
+  "rw": {
+    "groups": [
+    ]
+  },
+  "ro": {
+    "users": [
+      "d.lesage"
+    ]
+  }
+}
