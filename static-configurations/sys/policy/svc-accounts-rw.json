@@ -1,6 +1,6 @@
 {
   "path": {
-    "services/": {
+    "services/*": {
       "capabilities": ["list"]
     },
     "services/accounts/*": {
