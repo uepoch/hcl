@@ -5,6 +5,9 @@
     },
     "services/accounts/*": {
       "capabilities": ["read", "list", "create"]
+    },
+    "services/data/accounts/*": {
+      "capabilities": ["read", "list", "create"]
     }
   }
 }
