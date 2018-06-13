@@ -1,0 +1,5 @@
+inherited: false
+owners:
+- group/platform_pre
+- group/escalation_team
+
