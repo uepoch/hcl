@@ -120,6 +120,7 @@ def generate_policies(acl):
                 r = role["rights"]
 
         main = {"path": generate_rights(acl["path"], r)}
+        main["path"].update({"{}/ACL".format(acl["path"]): RO_RIGHTS})
         for denied_path in acl["subpaths"]:
             if "options" in acl["roles"] and acl["roles"]["options"].get("listing", True):
                 main["path"].update(generate_rights(denied_path["path"], NO_RIGHTS))
@@ -133,6 +134,8 @@ def generate_files(ACLs, output_dir):
     ret = []
     for acl in ACLs:
         logging.debug("Creating files for %s", acl)
+        logging.debug("Creating ACL placeholder for %s", acl['path'])
+        write_file("{}/{}/ACL.json".format(output_dir, acl['path']), hcl.dumps(acl['roles'], indent=4))
         for name, role, policy in generate_policies(acl):
             policy_file = "{}/{}/{}.json".format(output_dir, VAULT_POLICIES_PATH, name)
             write_file(policy_file, hcl.dumps(policy, indent=4))

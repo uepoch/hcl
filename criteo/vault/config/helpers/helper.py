@@ -47,6 +47,7 @@ def read_file(pathname):
 
 
 def write_file(pathname, content):
+    os.makedirs(os.path.dirname(pathname), exist_ok=True)
     with open(pathname, 'w') as f:
         return f.write(content)
 
