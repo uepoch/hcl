@@ -1,0 +1,8 @@
+{
+  "policies": [
+    "default",
+    "vault-catalog"
+  ],
+  "bind_secret_id": true,
+  "period": "6h"
+}

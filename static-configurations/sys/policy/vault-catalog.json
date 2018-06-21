@@ -1,0 +1,34 @@
+{
+  "path": {
+    "sys/plugins/*": {
+      "capabilities": [
+        "read",
+        "update",
+        "create",
+        "list",
+        "delete",
+        "sudo"
+      ]
+    },
+    "sys/mounts/*": {
+      "capabilities": [
+        "read",
+        "update",
+        "create",
+        "list",
+        "delete",
+        "sudo"
+      ]
+    },
+    "sys/auth/*": {
+      "capabilities": [
+        "read",
+        "update",
+        "create",
+        "list",
+        "delete",
+        "sudo"
+      ]
+    }
+  }
+}
