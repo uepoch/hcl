@@ -1,0 +1,11 @@
+{
+        "admin": {
+		"users": [ "r.saissy" ]
+	},
+	"rw": {
+		"groups": ["gu-sre-lake"]
+	},
+	"ro": {
+		"users": ["n.helleringer"]
+	}
+}
