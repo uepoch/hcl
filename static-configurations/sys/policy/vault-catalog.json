@@ -29,6 +29,16 @@
         "delete",
         "sudo"
       ]
+    },
+    "auth/*": {
+      "capabilities": [
+        "read",
+        "update",
+        "create",
+        "list",
+        "delete",
+        "sudo"
+      ]
     }
   }
 }
