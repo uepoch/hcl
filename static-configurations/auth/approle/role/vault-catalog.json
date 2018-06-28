@@ -3,6 +3,6 @@
     "default",
     "vault-catalog"
   ],
-  "bind_secret_id": true,
-  "period": "6h"
+  "bind_secret_id": false,
+  "bound_cidr_list": "10.0.0.0/8"
 }
