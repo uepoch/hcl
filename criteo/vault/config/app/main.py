@@ -133,7 +133,7 @@ def main():
         assert_valid_client(client)
         enable_auth_backends(client, BUILD_PATH)
         enable_secret_backends(client, BUILD_PATH)
-        apply_configuration(client, BUILD_PATH, cleanup=True)
+        apply_configuration(client, BUILD_PATH)
 
 
 if __name__ == '__main__':
