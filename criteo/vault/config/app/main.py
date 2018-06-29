@@ -72,7 +72,7 @@ def build_static_config(input_dir, output_dir, template=True, ctx=None):
     crawl_map(build_file, input_dir + "/**", input_dir + "/**/.*")
 
 
-def apply_configuration(client, conf_dir, cleanup=True):
+def apply_configuration(client, conf_dir, cleanup=False):
     def apply_then_cleanup(folder):
         resources = glob.glob(folder + "/*")
         dirs = [x for x in resources if os.path.isdir(x)]
