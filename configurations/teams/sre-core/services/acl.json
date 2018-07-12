@@ -6,6 +6,7 @@
 		"groups": [
 			"gu-sre-core-services",
 			"gu-core-infra",
+			"gu-network",
 			"gu-core-services"
 		]
 	}
