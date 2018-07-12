@@ -5,6 +5,7 @@
 	"rw": {
 		"groups": [
 			"gu-sre-core-services",
+			"gu-core-infra",
 			"gu-core-services"
 		]
 	}
