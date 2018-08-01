@@ -9,6 +9,7 @@ import shutil
 import sys
 
 from criteo.vault.config.app.teams import *
+from criteo.vault.config.app.group import *
 from criteo.vault.config.variables.vault import *
 
 
@@ -106,7 +107,8 @@ def apply_configuration(client, conf_dir, cleanup=False):
 def main():
     parser = argparse.ArgumentParser(description="Vault Deployer")
     parser.add_argument("-t", "--token", help="The vault token you want to use", default=os.getenv("VAULT_TOKEN", ""))
-    parser.add_argument("-E", "--criteo-env", help="Criteo ENV to substitute in strings", dest="env", default=os.getenv("CRITEO_ENV", "preprod"))
+    parser.add_argument("-E", "--criteo-env", help="Criteo ENV to substitute in strings", dest="env",
+                        default=os.getenv("CRITEO_ENV", "preprod"))
     parser.add_argument("-H", "--vault-addr", help="The vault server address", dest='addr',
                         default=os.getenv("VAULT_ADDR", "https://127.0.0.1:8200"))
     parser.add_argument("-d", "--debug", help="Enable debug logging", dest='loglevel', action="store_const",
@@ -134,6 +136,7 @@ def main():
         enable_auth_backends(client, BUILD_PATH)
         enable_secret_backends(client, BUILD_PATH)
         apply_configuration(client, BUILD_PATH)
+        link_policies_to_groups_and_users(client, BUILD_PATH)
 
 
 if __name__ == '__main__':
