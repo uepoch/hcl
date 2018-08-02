@@ -6,6 +6,8 @@ build/
 .settings/
 .vscode/
 tmp/
+*.iml
+null/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
