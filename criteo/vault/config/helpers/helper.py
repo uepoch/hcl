@@ -4,8 +4,35 @@ import hcl
 import jinja2
 import yaml
 
+from inspect import getsource, getfullargspec
+from functools import wraps
+
 # TODO: Use glob standard package when devtools upgrade python to 3.5
 import glob2
+
+from criteo.vault.config.variables import MURPHY_MATCHER
+
+
+def argument_checker(name, validator, message=""):
+    def wrap(f):
+        argspec = getfullargspec(f)
+        arg_index = argspec.args.index(name)
+
+        @wraps(f)
+        def arg_check(*args, **kwargs):
+            value = kwargs.get(name, None) or args[arg_index]
+            if not validator(value):
+                if message:
+                    raise ValueError(message.format(name=name, value=value))
+                else:
+                    raise ValueError(
+                        "Function {} failed with validator {} ran with {}".format(f.__name__, getsource(validator),
+                                                                                  value))
+            return f(*args, **kwargs)
+
+        return arg_check
+
+    return wrap
 
 
 def go_vcs_root(test, dirs=(".git",), default=None):
@@ -52,10 +79,11 @@ def write_file(pathname, content):
         return f.write(content)
 
 
-def crawl_map(fn, *patterns):
+def crawl_map(fn, *patterns, ignored_pattern=""):
     entries = []
     for pattern in patterns:
-        new_entries = [x for x in glob2.glob(pattern) if x not in entries]
+        new_entries = [x for x in glob2.glob(pattern) if
+                       not (x in entries or (ignored_pattern and ignored_pattern in x))]
         for f in sorted(new_entries):
             fn(f)
 
@@ -96,3 +124,7 @@ def parse(filename):
             return parser.load(f)
         else:
             return {'value': f.read()}
+
+
+def sanitize_murphy_description(description=""):
+    return MURPHY_MATCHER.sub("", description, count=1)

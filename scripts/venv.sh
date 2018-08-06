@@ -5,7 +5,7 @@ VENV_BIN="${VENV}/bin"
 
 if [[ ! -n ${VIRTUAL_ENV} ]]; then
     if [[ ! -e ${VENV_BIN}/activate ]]; then
-        virtualenv -q -p python3 --prompt="(vault-configuration) " ${VENV}
+        virtualenv -q -p python3.6 --prompt="(vault-configuration) " ${VENV}
     fi
 
     source ${VENV_BIN}/activate

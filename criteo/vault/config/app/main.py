@@ -10,6 +10,7 @@ import sys
 
 from criteo.vault.config.app.teams import *
 from criteo.vault.config.app.group import *
+from criteo.vault.config.app.identity import update_ldap_group_aliases
 from criteo.vault.config.variables.vault import *
 
 
@@ -101,6 +102,7 @@ def apply_configuration(client, conf_dir, cleanup=False):
         for subdir in dirs:
             logging.debug("Entering %s", subdir)
             apply_then_cleanup(subdir)
+
     crawl_map(apply_then_cleanup, conf_dir + "sys/*", conf_dir + "/*")
 
 
@@ -125,8 +127,10 @@ def main():
 
     go_vcs_root(os.getcwd(), default=os.getcwd())
 
+    ctx = {"env": args.env}
+
     if not args.nobuild:
-        build_static_config(STATIC_CONF_PATH, BUILD_PATH, ctx={"env": args.env})
+        build_static_config(STATIC_CONF_PATH, BUILD_PATH, ctx=ctx)
         generate_team_storage("configurations/teams", BUILD_PATH)
     if not args.nodeploy:
         if not args.token:
@@ -136,7 +140,9 @@ def main():
         enable_auth_backends(client, BUILD_PATH)
         enable_secret_backends(client, BUILD_PATH)
         apply_configuration(client, BUILD_PATH)
-        link_policies_to_groups_and_users(client, BUILD_PATH)
+
+        update_ldap_group_aliases(client, ctx=ctx)
+        link_policies_to_users(client, BUILD_PATH)
 
 
 if __name__ == '__main__':
