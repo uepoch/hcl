@@ -6,17 +6,24 @@ cd $(git rev-parse --show-toplevel)
 
 vault_version="$(cat ./VAULT_VERSION | tr -d '\n')"
 
+set -x
+
 if ! [ -d "$TMPDIR" ]; then
     mkdir -p "$TMPDIR"
 fi
 cd "$TMPDIR"
 
+rm ./vault
 
-if command -v vault > /dev/null && [ "$(vault version | awk '{print $2}')" == "v${vault_version}" ]; then
-    if ! [ -e "./vault" ]; then
-        ln -s $(command -v vault) ./vault
+set -e
+
+VAULT_BIN="$(command -v vault | tr -d '\n')"
+
+if [ -x "$VAULT_BIN" ] && [ "$(vault version | awk '{print $2}')" == "v${vault_version}" ]; then
+    if [ -e "./vault" ]; then
+        rm "./vault"
     fi
-
+    ln -s $VAULT_BIN ./vault
 elif ! [ -x "./vault" ] || ! [ "$(./vault version | awk '{print $2}')" == "v${vault_version}" ]; then
     ARCH="386"
     if [ "$(getconf LONG_BIT)" -eq 64 ]; then
