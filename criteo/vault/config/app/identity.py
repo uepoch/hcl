@@ -46,6 +46,8 @@ def update_ldap_group_aliases(client, ctx):
             identity_group_id, _ = create_group(client, name, 'external')
         logging.debug("group {name} has id {id}".format(name=name, id=identity_group_id))
         create_group(client, name, 'external', policies=policy_list, metadata=metadata, ID=identity_group_id)
+        if name in local_groups:
+            client.delete('auth/ldap/groups/{}'.format(name))
         alias_group_id = None
         if type(group_data) is dict and group_data.get('alias', {}):
             alias_group_id = group_data['alias']['id']
