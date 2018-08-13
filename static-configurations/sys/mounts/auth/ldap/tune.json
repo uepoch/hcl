@@ -1,0 +1,6 @@
+{
+  "default_lease_ttl": 86400,
+  "max_lease_ttl": 345600,
+  "description": "LDAP Backend on Unified Active directory",
+  "listing_visibility": "unauth"
+}

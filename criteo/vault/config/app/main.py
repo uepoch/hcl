@@ -26,7 +26,7 @@ def enable_auth_backends(client, conf_dir):
 def enable_secret_backends(client, conf_dir):
     remote_backends = client.list_secret_backends()
     for local_backend, conf in [(get_name(os.path.basename(x)), parse(x)) for x in
-                                glob.glob("{}/{}/*".format(conf_dir, VAULT_MOUNTS_PATH))]:
+                                glob.glob("{}/{}/*.json".format(conf_dir, VAULT_MOUNTS_PATH))]:
         backend_path = local_backend + "/"
         if backend_path in remote_backends:
             orig = remote_backends[backend_path]
