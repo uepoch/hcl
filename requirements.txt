@@ -1,5 +1,5 @@
 PyYAML
-hvac==0.3.0
+hvac==0.6.3
 pyhcl==0.3.10
 pyaml==17.10.0
 jinja2==2.10
