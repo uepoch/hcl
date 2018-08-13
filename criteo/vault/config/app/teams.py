@@ -135,6 +135,7 @@ def generate_files(ACLs, output_dir):
     for acl in ACLs:
         logging.debug("Creating files for %s", acl)
         logging.debug("Creating ACL placeholder for %s", acl['path'])
+        write_file("{}/{}/.nocleanup".format(output_dir, acl['path']), "")
         write_file("{}/{}/ACL.json".format(output_dir, acl['path']), hcl.dumps(acl['roles'], indent=4))
         for name, role, policy in generate_policies(acl):
             policy_file = "{}/{}/{}.json".format(output_dir, VAULT_POLICIES_PATH, name)

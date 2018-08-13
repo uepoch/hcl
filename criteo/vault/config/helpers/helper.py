@@ -50,7 +50,7 @@ def go_vcs_root(test, dirs=(".git",), default=None):
 
 
 def vaultify_path(file_path):
-    return "/".join(file_path.split("/")[1:])
+    return get_name("/".join(file_path.split("/")[1:]))
 
 
 def render_template(file_path, ctx):

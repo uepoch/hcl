@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import hvac
+from hvac.exceptions import UnexpectedError
 import sys
 import shutil
 
@@ -77,28 +78,54 @@ def build_static_config(input_dir, output_dir, template=True, ctx=None):
 def apply_configuration(client, conf_dir, cleanup=False):
     def apply_then_cleanup(folder):
         resources = glob.glob(folder + "/*")
-        dirs = [x for x in resources if os.path.isdir(x)]
-        configs = [(vaultify_path(get_name(x)), parse(x)) for x in resources if x not in dirs]
-        old_configs = client.list(vaultify_path(folder)) or []
+        dirs = []
+        configs = []
+        for r in resources:
+            if os.path.isdir(r):
+                dirs.append(r)
+            else:
+                configs.append((vaultify_path(r), parse(r)))
+        do_cleanup = cleanup and not os.path.exists(folder + '/.nocleanup')
+        api_path = vaultify_path(folder)
+        if api_path == 'teams':
+            print(1)
+        old_configs = []
+        try:
+            old_configs = ["{}/{}".format(api_path, x) for x in client.list(api_path)['data']['keys'] if
+                           not x.endswith('/')]
+            if api_path == VAULT_POLICIES_PATH:
+                old_configs.remove(api_path + "/root")
+            logging.debug("Existing configs in vault:")
+            for x in old_configs:
+                logging.debug("- {}".format(x))
+        except UnexpectedError as e:
+            if e.errors is not None:
+                raise e
+            if do_cleanup:
+                logging.error("{} doesn't support listing. Add .nocleanup in the directory".format(api_path))
+                exit(1)
+            else:
+                logging.warning(
+                    "{} doesn't support listing. No information can be given on already present configurations".format(
+                        api_path))
+        except (TypeError, KeyError):
+            old_configs = []
         if not os.path.exists(folder + "/.noupdate"):
-            if VAULT_DATA_KEY in old_configs:
-                old_configs = [vaultify_path(folder + "/" + x) for x in old_configs[VAULT_DATA_KEY]["keys"]]
-                logging.debug("Existing configs in vault: %s", old_configs)
-                # We can't touch it, it's hardcoded, it sucks.
-                if vaultify_path(folder) == VAULT_POLICIES_PATH:
-                    old_configs.remove(vaultify_path(folder + "/root"))
             for path, config in configs:
                 logging.info("Updating %s", path)
                 if path.startswith(VAULT_POLICIES_PATH):
+                    # Policies needs to be encoded in policy field
                     client.write(path, policy=hcl.dumps(config))
                 else:
                     client.write(path, **config)
                 if path in old_configs:
                     old_configs.remove(path)
-            if cleanup is True and not os.path.exists(folder + "/.nocleanup"):
-                for config in old_configs:
-                    logging.info("Deleting %s", config)
+            for config in old_configs:
+                if do_cleanup:
+                    logging.info("Deleting {}".format(config))
                     client.delete(config)
+                else:
+                    logging.info("{} is not deleted".format(config))
         for subdir in dirs:
             logging.debug("Entering %s", subdir)
             apply_then_cleanup(subdir)
@@ -121,6 +148,9 @@ def main():
                         action="store_true")
     parser.add_argument('-D', "--no-deploy", help="Prevent the configuration to be deployed", dest='nodeploy',
                         action="store_true")
+    parser.add_argument('-C', "--no-cleanup", help="Prevent the configuration to be cleared on deploy",
+                        dest='nocleanup',
+                        action="store_true")
     args = parser.parse_args()
 
     logging.basicConfig(level=args.loglevel, stream=sys.stdout)
@@ -139,7 +169,7 @@ def main():
         assert_valid_client(client)
         enable_auth_backends(client, BUILD_PATH)
         enable_secret_backends(client, BUILD_PATH)
-        apply_configuration(client, BUILD_PATH)
+        apply_configuration(client, BUILD_PATH, cleanup=not args.nocleanup)
 
         update_ldap_group_aliases(client, ctx=ctx)
         link_policies_to_users(client, BUILD_PATH)
