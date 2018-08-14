@@ -6,7 +6,8 @@
                 "update",
                 "create",
                 "list",
-                "delete"
+                "delete",
+		"sudo"
             ]
         }
     }
