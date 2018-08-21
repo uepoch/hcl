@@ -5,5 +5,8 @@
     "default_lease_ttl": "1h",
     "max_lease_ttl": "2h"
   },
+  "options": {
+    "version": "1"
+  },
   "local": true
 }

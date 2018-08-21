@@ -1,0 +1,7 @@
+{
+    "path": {
+        "test/*": {
+            "capabilities": ["read", "update", "create", "list", "delete"]
+        }
+    }
+}
