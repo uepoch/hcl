@@ -31,7 +31,6 @@ def list_identity_generic(client, identity_type, alias=True):
     list_data = client.list('identity/{}/id'.format(identity_type + "-alias" if alias else ""))
     if not list_data:
         return [], {}
-    print(list_data)
     return list_data['data']['keys'], list_data['data']['key_info']
 
 
@@ -116,4 +115,4 @@ def create_identity_alias_generic(client, identity_type, name, canonical_id, mou
 
 @identity_type_check
 def delete_identity_generic(client, identity_type, id, alias=True):
-    client.delete('identity/{}/id/{}'.format(identity_type + "-alias" if alias else "", id))
+    client.delete('identity/{}/id/{}'.format(identity_type + "-alias" if alias else identity_type, id))

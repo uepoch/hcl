@@ -11,7 +11,7 @@ import sys
 
 from criteo.vault.config.app.teams import *
 from criteo.vault.config.app.group import *
-from criteo.vault.config.app.identity import update_ldap_group_aliases
+from criteo.vault.config.app.identity import *
 from criteo.vault.config.variables.vault import *
 
 
@@ -87,8 +87,6 @@ def apply_configuration(client, conf_dir, cleanup=False):
                 configs.append((vaultify_path(r), parse(r)))
         do_cleanup = cleanup and not os.path.exists(folder + '/.nocleanup')
         api_path = vaultify_path(folder)
-        if api_path == 'teams':
-            print(1)
         old_configs = []
         try:
             old_configs = ["{}/{}".format(api_path, x) for x in client.list(api_path)['data']['keys'] if
@@ -172,6 +170,7 @@ def main():
         apply_configuration(client, BUILD_PATH, cleanup=not args.nocleanup)
 
         update_ldap_group_aliases(client, ctx=ctx)
+        update_ldap_entity_aliases(client, ctx=ctx)
         link_policies_to_users(client, BUILD_PATH)
 
 
