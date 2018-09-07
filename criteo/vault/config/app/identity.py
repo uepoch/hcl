@@ -10,7 +10,8 @@ def fetch_ldap_groups(environment):
 
 
 def fetch_ldap_users(environment):
-    return requests.get("https://idm.{}.crto.in/tool/ldapUsers".format(environment)).json()
+    users = requests.get("https://idm.{}.crto.in/tool/ldapGroupMembersInfo/gu-rnd".format(environment)).json()
+    return [user["name"] for user in users]
 
 
 def fetch_local_ldap_groups():
