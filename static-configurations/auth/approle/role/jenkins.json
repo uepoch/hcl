@@ -5,5 +5,7 @@
   ],
   "bind_secret_id": false,
   "bound_cidr_list": "10.0.0.0/8",
-  "token_ttl": 300
+  "token_ttl": 300,
+  "token_max_ttl": 300,
+  "token_num_uses": 0
 }
