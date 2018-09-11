@@ -1,0 +1,11 @@
+{
+        "admin": {
+		"users": [ "d.moakhar" ]
+	},
+	"rw": {
+		"groups": ["gu-sre-lake"]
+	},
+	"ro": {
+		"users": ["n.helleringer"]
+	}
+}
