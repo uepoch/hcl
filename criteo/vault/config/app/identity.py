@@ -6,12 +6,29 @@ from criteo.vault.config.variables import BUILD_PATH
 
 
 def fetch_ldap_groups(environment):
-    return requests.get("https://idm.{}.crto.in/tool/ldapUserGroup".format(environment)).json()
+    try:
+        res = requests.get("https://idm.{}.crto.in/tool/ldapUserGroup".format(environment))
+        groups = res.json()
+        logging.debug("Fetched groups:")
+        logging.debug(groups)
+        return groups
+    except Exception as e:
+        logging.error("Error while getting the remote groups from idm.crto.in, response was:")
+        logging.error(res)
+        raise e
 
 
 def fetch_ldap_users(environment):
-    users = requests.get("https://idm.{}.crto.in/tool/ldapGroupMembersInfo/gu-rnd".format(environment)).json()
-    return [user["name"] for user in users]
+    try:
+        res = requests.get("https://idm.{}.crto.in/tool/ldapGroupMembersInfo/gu-rnd".format(environment))
+        users = res.json()
+        logging.debug("Fetched users:")
+        logging.debug(users)
+        return [user["name"] for user in users]
+    except Exception as e:
+        logging.error("Error while getting the remote users from idm.crto.in, response was:")
+        logging.error(res)
+        raise e
 
 
 def fetch_local_ldap_groups():

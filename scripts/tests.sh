@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 #
-# usage: ./tests.sh [--interactive]
-#  if --interactive is precised doesn't stop vault server.
-
-# helper
+# usage: ./tests.sh [-iv]
 
 exit_status() {
     exit_status=$?
@@ -18,9 +15,34 @@ exit_status() {
 
 # main
 
+INTERACTIVE=0
+PYTHON_OPTS="${PYTHON_OPTS}"
+
+
 cd $(git rev-parse --show-toplevel)
 
-is_interactive=$1
+usage()
+{
+    echo >&2 "Usage: $0 -[iv]"
+    echo >&2 "  -i      Interactive mode: Keep the vault server up"
+    echo >&2 "  -v      Verbose mode: Activate debug output"
+    echo >&2 "Usage: tests.sh -i -v"
+    exit 1
+}
+
+while getopts ":iv" option; do
+    case "${option}" in
+        i)
+            INTERACTIVE=1
+            ;;
+        v)
+            PYTHON_OPTS="$PYTHON_OPTS -d"
+            ;;
+        *)
+            usage
+            ;;
+    esac
+done
 
 . ./bootstrap.sh
 
@@ -40,10 +62,10 @@ export VAULT_TOKEN="$(cat ./scripts/vault-dev-token.txt)"
 
 
 echo "*** INFO: first execution, to provision vault server ***"
-python ./app/main.py
+python ./app/main.py $PYTHON_OPTS
 
 
-if [[ "${is_interactive}" != "--interactive" ]]; then
+if [[ "${INTERACTIVE}" -eq 0 ]]; then
   ./scripts/vault.sh stop
 else
   echo "Interactive tests with local vault in dev mode (storage in memory), execute that:"

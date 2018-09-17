@@ -15,7 +15,7 @@ git clone "ssh://${GITUSER:-qabot}@review.criteois.lan:29418/identity-management
 )
 
 echo "Building the configuration"
-python app/main.py --no-deploy
+python app/main.py -d --no-deploy
 
 echo "Updated the configuration"
 rm -rvf $BACKUP_PATH/*
