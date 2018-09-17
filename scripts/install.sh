@@ -35,8 +35,8 @@ elif ! [ -x "./vault" ] || ! [ "$(./vault version | awk '{print $2}')" == "v${va
     fi
     ARCHIVE_NAME="vault_${vault_version}_${OS}_${ARCH}.zip"
     url="https://releases.hashicorp.com/vault/${vault_version}/${ARCHIVE_NAME}"
-    if ! [ -f archive ]; then
-        wget "${url}"
+    if ! [ -f "./$ARCHIVE_NAME" ]; then
+        curl "${url}" -o "./${ARCHIVE_NAME}"
     fi
     unzip -o "./${ARCHIVE_NAME}"
     chmod +x ./vault
