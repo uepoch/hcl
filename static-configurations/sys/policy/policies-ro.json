@@ -1,0 +1,16 @@
+{
+    "path": {
+        "sys/policies": {
+            "capabilities": ["read", "list"]
+        },
+        "sys/policies/*": {
+            "capabilities": ["read", "list"]
+        },
+        "sys/policy": {
+            "capabilities": ["read", "list"]
+        },
+        "sys/policy/*": {
+            "capabilities": ["read", "list"]
+        }
+    }
+}

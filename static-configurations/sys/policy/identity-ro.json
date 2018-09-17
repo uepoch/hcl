@@ -1,0 +1,10 @@
+{
+    "path": {
+        "identity/*": {
+            "capabilities": ["read", "list"]
+        },
+        "identity/lookup/*": {
+            "capabilities": ["read", "list", "update"]
+        }
+    }
+}
