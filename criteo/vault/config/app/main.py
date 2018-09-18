@@ -15,35 +15,39 @@ from criteo.vault.config.app.identity import *
 from criteo.vault.config.variables.vault import *
 
 
+def enable_mounts(client, conf_dir, path):
+    remote_mounts = client.read(path)['data']
+    plugins = client.list('sys/plugins/catalog').get('data', {}).get('keys', [])
+
+    for local_mount, conf in [(get_name(os.path.basename(x)), parse(x)) for x in
+                              glob.glob("{}/{}/*.json".format(conf_dir, path))]:
+        mount_path = local_mount + "/"
+        if conf['type'] == "plugin":
+            if conf['plugin_name'] == "":
+                logging.error("You must provide a valid plugin_name in %s", local_mount)
+                exit(1)
+            elif conf['plugin_name'] not in plugins:
+                logging.warning("Plugin based mount detected in %s that is not in the deployed plugins of the vault server. Skipping..", local_mount)
+                shutil.rmtree("{}/{}/{}/".format(conf_dir, "sys/auth", local_mount), True)
+                shutil.rmtree("{}/{}/{}".format(conf_dir, "auth", local_mount))
+                continue
+        if mount_path in remote_mounts:
+            orig = remote_mounts[mount_path]
+            if orig['type'] != conf['type']:
+                logging.error("%s/%s mount have a different type in the configuration and server", path,  local_mount)
+                logging.error("Remote: %s", orig)
+                logging.error("Local: %s", conf)
+        else:
+            logging.info("Enabling %s mount", local_mount)
+            client.write("{}/{}".format(path, local_mount), **conf)
+
+
 def enable_auth_backends(client, conf_dir):
-    backends = client.list_auth_backends()
-    for backend in [os.path.basename(x) for x in glob.glob("{}/auth/*".format(conf_dir)) if
-                    os.path.isdir(x) and os.path.basename(x) + "/" not in backends]:
-        logging.info("Mounted auth backend %s", backend)
-        client.enable_auth_backend(backend_type=backend)
+    enable_mounts(client, conf_dir, VAULT_AUTH_MOUNTS_PATH)
 
 
 def enable_secret_backends(client, conf_dir):
-    remote_backends = client.list_secret_backends()
-    for local_backend, conf in [(get_name(os.path.basename(x)), parse(x)) for x in
-                                glob.glob("{}/{}/*.json".format(conf_dir, VAULT_MOUNTS_PATH))]:
-        backend_path = local_backend + "/"
-        if backend_path in remote_backends:
-            orig = remote_backends[backend_path]
-            if orig['type'] != conf['type']:
-                logging.error("%s secret backend have a different type in the configuration and server", local_backend)
-                logging.error("Remote: %s", orig)
-                logging.error("Local: %s", conf)
-            if orig['description'] != conf['description']:
-                logging.warning("%s secret backend have a different description in the configuration and server",
-                                local_backend)
-            logging.info("Updating TTL information for %s", local_backend)
-            client.write("{}/{}/tune".format(VAULT_MOUNTS_PATH, local_backend),
-                         default_lease_ttl=conf.get("config", {}).get("default_lease_ttl", 0),
-                         max_lease_ttl=conf.get("config", {}).get("max_lease_ttl", 0))
-        else:
-            logging.info("Enabling %s secret backend", local_backend)
-            client.write("{}/{}".format(VAULT_MOUNTS_PATH, local_backend), **conf)
+    enable_mounts(client, conf_dir, VAULT_MOUNTS_PATH)
 
 
 def build_static_config(input_dir, output_dir, template=True, ctx=None):

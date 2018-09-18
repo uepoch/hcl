@@ -28,5 +28,5 @@ if ! [ -d "./build" ];then
 fi
 
 echo "Deploying configuration"
-python app/main.py -d --no-build
+python app/main.py -d
 echo "Deployed configuration"

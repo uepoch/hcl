@@ -1,0 +1,4 @@
+{
+    "type": "plugin",
+    "plugin_name": "vault-auth-plugin-chef"
+}
