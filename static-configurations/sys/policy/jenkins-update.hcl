@@ -5,11 +5,19 @@ path "sys/auth" {
     ]
 }
 
+path "sys/plugins/*" {
+    capabilities = [
+        "read",
+        "list"
+    ]
+}
+
 path "sys/auth/*" {
     capabilities = [
         "read",
         "update",
-        "create"
+        "create",
+        "list"
     ]
 }
 
