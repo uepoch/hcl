@@ -1,0 +1,10 @@
+{
+    "path": {
+        "services/secrets/opendj/": {
+            "capabilities": ["read", "list"]
+        },
+        "services/secrets/opendj/*": {
+            "capabilities": ["read", "list", "update", "create", "delete"]
+        }
+    }
+}
