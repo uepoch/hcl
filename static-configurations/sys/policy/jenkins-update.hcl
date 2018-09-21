@@ -8,7 +8,8 @@ path "sys/auth" {
 path "sys/plugins/*" {
     capabilities = [
         "read",
-        "list"
+        "list",
+        "sudo"
     ]
 }
 
