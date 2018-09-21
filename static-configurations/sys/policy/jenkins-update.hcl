@@ -1,7 +1,8 @@
 path "sys/auth" {
     capabilities = [
         "read",
-        "list"
+        "list",
+        "sudo"
     ]
 }
 
@@ -18,7 +19,8 @@ path "sys/auth/*" {
         "read",
         "update",
         "create",
-        "list"
+        "list",
+        "sudo"
     ]
 }
 

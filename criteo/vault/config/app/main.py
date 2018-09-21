@@ -169,6 +169,8 @@ def main():
             logging.error("You need to provide a VAULT_TOKEN.")
         client = hvac.Client(url=args.addr, token=args.token)
         assert_valid_client(client)
+        # Apply a first time jenkins policy, to make sure changes are passed before actually touching any other endpoint
+        client.set_policy("jenkins-update", rules=parse("{}/{}/jenkins-update.hcl".format(BUILD_PATH, VAULT_POLICIES_PATH)))
         enable_auth_backends(client, BUILD_PATH)
         enable_secret_backends(client, BUILD_PATH)
         apply_configuration(client, BUILD_PATH, cleanup=not args.nocleanup)
