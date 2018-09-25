@@ -1,0 +1,5 @@
+{
+  "user_claim": "ctx:user:uid",
+  "period": 3600,
+  "bound_cidrs": "0.0.0.0/0"
+}

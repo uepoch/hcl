@@ -15,7 +15,7 @@ def list_entity_alias_from_accessor(client, mount_accessor):
 
 
 @identity_type_check
-def list_identity_alias_from_accessor(client, identity_type, mount_accessor):
+def list_identity_alias_from_accessor(client, identity_type: str, mount_accessor: str):
     keys, data = list_identity_generic(client, identity_type, alias=True)
     ret_keys = []
     ret_info = {}

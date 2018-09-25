@@ -1,10 +1,12 @@
 import requests
 import logging
+from functools import lru_cache
 from os.path import basename
 from criteo.vault.config.helpers import *
 from criteo.vault.config.variables import BUILD_PATH
 
 
+@lru_cache(2)
 def fetch_ldap_groups(environment):
     try:
         res = requests.get("https://idm.{}.crto.in/tool/ldapUserGroup".format(environment))
@@ -14,10 +16,11 @@ def fetch_ldap_groups(environment):
         return groups
     except Exception as e:
         logging.error("Error while getting the remote groups from idm.crto.in, response was:")
-        logging.error(res)
+        logging.error(res.content)
         raise e
 
 
+@lru_cache(2)
 def fetch_ldap_users(environment):
     try:
         res = requests.get("https://idm.{}.crto.in/tool/ldapGroupMembersInfo/gu-rnd".format(environment))
@@ -27,32 +30,90 @@ def fetch_ldap_users(environment):
         return [user["name"] for user in users]
     except Exception as e:
         logging.error("Error while getting the remote users from idm.crto.in, response was:")
-        logging.error(res)
+        logging.error(res.content)
         raise e
 
 
-def fetch_local_ldap_groups():
-    groups = {}
+@lru_cache(3)
+def _fetch_local_ldap_generic(type):
+    r = {}
 
-    def load_group_info(file):
+    def load_info(file):
         data = parse(file)
-        group_name = basename(get_name(file))
-        groups[group_name] = data
+        name = basename(get_name(file))
+        r[name] = data
 
-    crawl_map(load_group_info, BUILD_PATH + "/auth/ldap/groups/*.json")
-    return groups  # groups = {'gu-idm': {'policies': ['abc']}}
+    crawl_map(load_info, BUILD_PATH + "/auth/ldap/{}/*.json".format(type))
+    return r  # r = {'gu-idm': {'policies': ['abc']}}
+
+
+def fetch_local_ldap_groups():
+    return _fetch_local_ldap_generic("groups")
 
 
 def fetch_local_ldap_users():
-    entities = {}
+    return _fetch_local_ldap_generic("users")
 
-    def load_entity_info(file):
-        data = parse(file)
-        entity_name = basename(get_name(file))
-        entities[entity_name] = data
 
-    crawl_map(load_entity_info, BUILD_PATH + "/auth/ldap/users/*.json")
-    return entities  # entity = {'t.jacquart': {'policies': ['abc']}}
+def attach_aliases_from_backends(client, ctx, backends):
+    for backend in backends:
+        attach_aliases_from_backend(client, ctx, backend)
+
+
+def attach_aliases_from_backend(client, ctx, backend):
+    if 'env' not in ctx:
+            raise RuntimeError("You must provide env in context object")
+    env = ctx['env']
+    auth_backends = client.list_auth_backends()
+    if backend + '/' not in auth_backends:
+        raise RuntimeError(
+            "Auth Backend {} Not initialized or not found, \n".format(type) +
+            "If it's the first run. please make sure a first pass has been made.")
+    backend_accessor = auth_backends[backend + '/']['accessor']
+    ldap_entities = fetch_ldap_users(env)
+
+    # Get entities from Vault
+    # We should only act on present ldap users entities to avoid uncontrolled behavior
+    # Waiting for next release of vault for endpoint to be released
+    # present_entities = client.list("identity/entity/name")
+    # entities = set(ldap_entities).intersection(present_entities)
+    entities = ldap_entities
+
+    aliases_to_delete, _ = list_entity_alias_from_accessor(client, backend_accessor)
+    for entity in entities:
+        # Fetch the ID from the Name
+        identity_entity_id, entity_data = lookup_entity_by_name(client, entity)
+
+        # Raise if we find that a listed entity is not lookup-able. This should not be possible
+        if not identity_entity_id:
+            raise RuntimeError("entity {name} is missing, potential race condition.".format(name=entity))
+
+        logging.debug("entity {name} has id {id}".format(name=entity, id=identity_entity_id))
+
+        # Search for an entity with an already attached alias with this name
+        identity_entity_alias_id, entity_alias_data = lookup_entity_by_name(client, entity, backend_accessor)
+
+        # We are the source of truth, if alias entity_id is not the right one, we override it
+        # This usually mean someone logged in with a method before we actually mapped him to its virtual entity
+        if identity_entity_alias_id and identity_entity_alias_id != identity_entity_id:
+            delete_identity_generic(client, 'entity', identity_entity_id, alias=False)
+            identity_entity_id = identity_entity_alias_id
+            entity_data = entity_alias_data
+
+        alias_entity_id = None
+        assert(type(entity_data) is dict)
+        entity_aliases = entity_data['aliases']
+        relevant_alias = [x for x in entity_aliases if x['mount_accessor'] == backend_accessor]
+
+        if len(relevant_alias) > 0:
+            alias_entity_id = relevant_alias[0]['id']
+        else:
+            alias_entity_id, _ = update_entity_alias(client, entity, identity_entity_id, backend_accessor, alias_entity_id)
+        if alias_entity_id in aliases_to_delete:
+            # We know him, don't delete it
+            aliases_to_delete.remove(alias_entity_id)
+    for ID in aliases_to_delete:
+        delete_identity_generic(client, 'entity', ID, alias=True)
 
 
 def update_ldap_group_aliases(client, ctx):

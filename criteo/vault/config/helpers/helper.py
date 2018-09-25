@@ -1,6 +1,7 @@
 import os
 import logging
 import hcl
+import json
 import jinja2
 import yaml
 
@@ -109,8 +110,9 @@ def add_policy_to_ldap_entity_file(file_path, *policy_names, prefix_cleanup=None
 
 
 def get_parser(extension):
-    # HCL being a superset of json(like yaml), no need for json package
-    if extension == ".json" or extension == ".hcl":
+    if extension == ".json":
+        return json
+    if extension == ".hcl":
         return hcl
     if extension == ".yaml" or extension == ".yml":
         return yaml
