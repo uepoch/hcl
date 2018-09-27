@@ -1,8 +1,8 @@
 {
     "url": "ldap://uad{{env}}.{{env}}.crto.in",
     "userdn": "OU=FIMUsers,DC=uad{{env}},DC={{env}},DC=crto,DC=in",
-    "groupdn": "OU=FIMGroups,DC=uad{{env}},DC={{env}},DC=crto,DC=in",
-    "insecure_tls": false,{% raw %}
-    "groupfilter": "(&(objectClass=group)(member:1.2.840.113556.1.4.1941:={{.UserDN}}))", {% endraw %}
-    "upndomain": "uad{{env}}.{{env}}.crto.in"
+    "groupdn": "DC=uad{{env}},DC={{env}},DC=crto,DC=in",
+    "insecure_tls": false,
+    "upndomain": "uad{{env}}.{{env}}.crto.in",
+    "use_token_groups": true
 }
