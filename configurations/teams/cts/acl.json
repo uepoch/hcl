@@ -1,0 +1,34 @@
+{
+    "admin": {
+      "users": [
+        "m.jaillais",
+        "j.bourillon",
+        "n.mourad",
+        "n.cana",
+        "s.giromella",
+        "t.lukasiewicz",
+        "m.haynie",
+        "c.selden",
+        "j.stolle"
+      ],
+      "groups": [
+        "gu-cts",
+        "gu-idm"
+      ]
+    },
+    "rw": {
+      "users": [
+        "f.jehl",
+        "r.claude",
+        "sz.ho",
+        "a.mazurov",
+        "p.lacave",
+        "a.pons"
+      ]
+    },
+    "ro": {
+      "users": [
+        "m.tournier"
+      ]
+    }
+}
