@@ -127,7 +127,7 @@ def attach_aliases_from_backend(client, ctx, backend):
 
         alias_entity_id = None
         assert (type(entity_data) is dict)
-        entity_aliases = entity_data['aliases']
+        entity_aliases = entity_data.get("aliases", None) or []
         relevant_alias = [x for x in entity_aliases if x['mount_accessor'] == backend_accessor]
 
         if len(relevant_alias) > 0:
@@ -223,12 +223,19 @@ def update_ldap_entity_aliases(client, ctx):
         if entity_name in local_entities:
             client.delete('auth/ldap/users/{}'.format(entity_name))
         alias_entity_id = None
-        if type(entity_data) is dict and entity_data.get('aliases', {}) \
-                and entity_data['aliases'][-1]['mount_accessor'] == ldap_accessor:
-            alias_entity_id = entity_data['aliases'][-1]['id']
+        assert (type(entity_data) is dict)
+        logging.debug("entity %s data: %s", entity_name, entity_data)
+        entity_aliases = entity_data.get("aliases", None) or []
+        relevant_alias = [x for x in entity_aliases if x['mount_accessor'] == ldap_accessor]
+
+        if len(relevant_alias) > 0:
+            alias_entity_id = relevant_alias[0]['id']
         else:
             alias_entity_id, _ = update_entity_alias(client, alias_name, identity_entity_id, ldap_accessor,
                                                      alias_entity_id)
+        if alias_entity_id in aliases_to_delete:
+            # We know him, don't delete it
+            aliases_to_delete.remove(alias_entity_id)
         if alias_entity_id in aliases_to_delete:
             # We know him, don't delete it
             aliases_to_delete.remove(alias_entity_id)

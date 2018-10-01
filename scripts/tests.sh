@@ -64,6 +64,9 @@ export VAULT_TOKEN="$(cat ./scripts/vault-dev-token.txt)"
 echo "*** INFO: first execution, to provision vault server ***"
 python ./app/main.py $PYTHON_OPTS
 
+echo "*** INFO: Another execution. ***"
+python ./app/main.py $PYTHON_OPTS
+
 
 if [[ "${INTERACTIVE}" -eq 0 ]]; then
   ./scripts/vault.sh stop
