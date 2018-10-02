@@ -10,7 +10,6 @@ import shutil
 import sys
 
 from criteo.vault.config.app.teams import *
-from criteo.vault.config.app.group import *
 from criteo.vault.config.app.identity import *
 from criteo.vault.config.app.jwk import *
 from criteo.vault.config.variables.vault import *
@@ -180,7 +179,6 @@ def main():
         update_ldap_group_aliases(client, ctx=ctx)
         update_ldap_entity_aliases(client, ctx=ctx)
         attach_aliases_from_backend(client, ctx, "jwt")
-        link_policies_to_users(client, BUILD_PATH)
 
 
 if __name__ == '__main__':

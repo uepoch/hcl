@@ -236,9 +236,6 @@ def update_ldap_entity_aliases(client, ctx):
         if alias_entity_id in aliases_to_delete:
             # We know him, don't delete it
             aliases_to_delete.remove(alias_entity_id)
-        if alias_entity_id in aliases_to_delete:
-            # We know him, don't delete it
-            aliases_to_delete.remove(alias_entity_id)
 
     for ID in aliases_to_delete:
         delete_identity_generic(client, 'entity', ID, alias=True)
