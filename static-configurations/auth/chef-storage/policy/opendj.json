@@ -1,0 +1,4 @@
+{
+    "policies": ["services-opendj-ro"],
+    "period": "24h"
+}
