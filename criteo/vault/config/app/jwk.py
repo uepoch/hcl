@@ -24,6 +24,9 @@ def get_issuers_keys(env: str):
     criteo_issuers = list(set(re.findall(r'criteo-[a-z-]+', main_page.content.decode('utf-8'))))
     pub_keys = []
     for iss_name in criteo_issuers:
+        if iss_name == "criteo-local":
+            # We don't trust criteo-local issuer. This would allow too much disclosure
+            continue
         iss_res = requests.get(domain + iss_name + ".jwk.json")
         keys = []
         if iss_res.status_code not in [200, 204]:
