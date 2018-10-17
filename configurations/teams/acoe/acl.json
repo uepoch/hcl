@@ -1,0 +1,24 @@
+{
+    "admin": {
+      "users": [
+        "a.deturckheim",
+        "r.pecqueur",
+        "g.vaudouer",
+        "a.souffrant",
+        "m.jaillais"
+      ],
+      "groups": [
+        "gu-idm"
+      ]
+    },
+    "rw": {
+      "users": [
+        "f.jehl",
+        "r.claude",
+        "sz.ho",
+        "a.mazurov",
+        "p.lacave",
+        "a.pons"
+      ]
+    }
+}
