@@ -5,6 +5,12 @@
         },
         "services/secrets/opendj/*": {
             "capabilities": ["read", "list", "update", "create", "delete"]
+        },
+        "services/secrets/chef/policy/opendj/": {
+            "capabilities": ["read", "list"]
+        },
+        "services/secrets/chef/policy/opendj/*": {
+            "capabilities": ["read", "list"]
         }
     }
 }

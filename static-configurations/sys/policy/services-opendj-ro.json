@@ -2,6 +2,9 @@
     "path": {
         "services/secrets/opendj/*": {
             "capabilities": ["read", "list"]
+        },
+        "services/secrets/chef/policy/*": {
+            "capabilities": ["read", "list"]
         }
     }
 }

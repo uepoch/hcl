@@ -1,0 +1,13 @@
+{
+  "path": {
+    "services/*": {
+      "capabilities": ["list"]
+    },
+    "services/keytabs/*": {
+      "capabilities": ["read", "list", "create", "update"]
+    },
+    "services/data/keytabs/*": {
+      "capabilities": ["read", "list", "create"]
+    }
+  }
+}

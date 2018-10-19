@@ -1,0 +1,13 @@
+{
+  "path": {
+    "services/*": {
+      "capabilities": ["list"]
+    },
+    "services/issuers/*": {
+      "capabilities": ["read", "list"]
+    },
+    "services/data/issuers/*": {
+      "capabilities": ["read", "list"]
+    }
+  }
+}
