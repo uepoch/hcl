@@ -1,0 +1,7 @@
+{
+    "path": {
+        "services/secrets/mim/*": {
+            "capabilities": ["read", "list"]
+        }
+    }
+}

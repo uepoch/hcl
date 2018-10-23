@@ -1,0 +1,4 @@
+{
+    "policies": ["services-mim-ro"],
+    "period": "24h"
+}
