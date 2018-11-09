@@ -1,3 +1,3 @@
 {
-  "policies": ["default", "sudoer", "policies-ro", "identity-ro", "services-opendj-rw", "services-mim-rw"]
+  "policies": ["default", "sudoer", "policies-ro", "identity-ro", "services-opendj-rw", "services-mim-rw", "services-issuers-rw"]
 }
