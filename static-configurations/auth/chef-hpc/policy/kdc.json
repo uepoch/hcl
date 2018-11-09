@@ -1,0 +1,4 @@
+{
+  "policies": ["services-kdc-ro"],
+  "period": "24h"
+}

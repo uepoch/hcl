@@ -1,0 +1,7 @@
+{
+    "path": {
+        "services/secrets/kdc/*": {
+            "capabilities": ["read", "list"]
+        }
+    }
+}
