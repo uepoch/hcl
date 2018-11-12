@@ -4,10 +4,10 @@
       "capabilities": ["list"]
     },
     "services/issuers/*": {
-      "capabilities": ["read", "list", "create", "update"]
+      "capabilities": ["read", "list", "create", "update", "delete"]
     },
     "services/data/issuers/*": {
-      "capabilities": ["read", "list", "create"]
+      "capabilities": ["read", "list", "create", "update", "delete"]
     }
   }
 }
