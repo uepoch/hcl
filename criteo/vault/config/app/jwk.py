@@ -22,6 +22,8 @@ def get_issuers_keys(env: str):
     if main_page.status_code not in [200, 204]:
         raise Exception("Call to {url} failed with status code {code}. Content: {content}".format(url=domain, code=main_page.status_code, content=main_page.content))
     criteo_issuers = list(set(re.findall(r'criteo-[a-z-]+', main_page.content.decode('utf-8'))))
+    if env == "preprod":
+        criteo_issuers.append("private-criteo-jtc")
     pub_keys = []
     for iss_name in criteo_issuers:
         if iss_name == "criteo-local":
