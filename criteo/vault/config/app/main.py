@@ -17,7 +17,13 @@ from criteo.vault.config.variables.vault import *
 
 def enable_mounts(client, conf_dir, path):
     remote_mounts = client.read(path)['data']
-    plugins = client.list('sys/plugins/catalog').get('data', {}).get('keys', [])
+    try:
+        plugins = client.list('sys/plugins/catalog').get('data', {}).get("keys", [])
+    except Exception:
+        plugins = client.read('sys/plugins/catalog')['data']
+        if "database" not in plugins:
+            raise Exception("invalid response from vault server.")
+        plugins = [name for plugType in plugins for name in plugins[plugType]]
 
     for local_mount, conf in [(get_name(os.path.basename(x)), parse(x)) for x in
                               glob.glob("{}/{}/*.json".format(conf_dir, path))]:

@@ -87,6 +87,8 @@ def create_identity_generic(client, identity_type, name, policies=None, metadata
     additional_args = {k: v for k, v in kwargs.items() if v is not None}
     req = {'name': name, 'policies': policies, 'metadata': metadata or {}, **additional_args}
     res = client.write("identity/{}".format(identity_type), **req)
+    if res is None:
+        return None, None
     if res.get('data', {}).get('id', "") == "":
         raise RuntimeError("Invalid data returned. Response is: {}".format(res))
     else:
