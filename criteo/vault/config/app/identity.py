@@ -81,7 +81,7 @@ def attach_aliases_from_backends(client, ctx, backends):
         attach_aliases_from_backend(client, ctx, backend)
 
 
-def attach_aliases_from_backend(client, ctx, backend):
+def attach_aliases_from_backend(client, ctx, backend, strip_ldap_prefix=True):
     if 'env' not in ctx:
         raise RuntimeError("You must provide env in context object")
     env = ctx['env']
@@ -92,9 +92,8 @@ def attach_aliases_from_backend(client, ctx, backend):
             "If it's the first run. please make sure a first pass has been made.")
     backend_accessor = auth_backends[backend + '/']['accessor']
     humans = fetch_ldap_users(env)
-    # Trim the prefix
-    # TODO: Make this behavior configurable if we ever step on a backend relying on LDAP names
-    services = [service[len('svc-'):] for service in fetch_ldap_services(env)]
+
+    services = fetch_ldap_services(env)
     ldap_entities = humans + services
 
     # Get entities from Vault
@@ -105,18 +104,23 @@ def attach_aliases_from_backend(client, ctx, backend):
     entities = ldap_entities
 
     aliases_to_delete, _ = list_entity_alias_from_accessor(client, backend_accessor)
-    for entity in entities:
+    for entity_name in entities:
+        alias_name = entity_name
+        if "-" in entity_name:
+            entity_name = entity_name[entity_name.index('-')+1:]
+            if strip_ldap_prefix:
+                alias_name = entity_name
         # Fetch the ID from the Name
-        identity_entity_id, entity_data = lookup_entity_by_name(client, entity)
+        identity_entity_id, entity_data = lookup_entity_by_name(client, entity_name)
 
         # Raise if we find that a listed entity is not lookup-able. This should not be possible
         if not identity_entity_id:
-            raise RuntimeError("entity {name} is missing, potential race condition.".format(name=entity))
+            raise RuntimeError("entity {name} is missing, potential race condition.".format(name=entity_name))
 
-        logging.debug("entity {name} has id {id}".format(name=entity, id=identity_entity_id))
+        logging.debug("entity {name} has id {id}".format(name=entity_name, id=identity_entity_id))
 
         # Search for an entity with an already attached alias with this name
-        identity_entity_alias_id, entity_alias_data = lookup_entity_by_name(client, entity, backend_accessor)
+        identity_entity_alias_id, entity_alias_data = lookup_entity_by_name(client, entity_name, backend_accessor)
 
         # We are the source of truth, if alias entity_id is not the right one, we override it
         # This usually mean someone logged in with a method before we actually mapped him to its virtual entity
@@ -133,7 +137,7 @@ def attach_aliases_from_backend(client, ctx, backend):
         if len(relevant_alias) > 0:
             alias_entity_id = relevant_alias[0]['id']
         else:
-            alias_entity_id, _ = update_entity_alias(client, entity, identity_entity_id, backend_accessor,
+            alias_entity_id, _ = update_entity_alias(client, alias_name, identity_entity_id, backend_accessor,
                                                      alias_entity_id)
         if alias_entity_id in aliases_to_delete:
             # We know him, don't delete it
@@ -203,8 +207,8 @@ def update_ldap_entity_aliases(client, ctx):
 
         policy_list = local_entities.get(entity_name, {}).get('policies', [])
 
-        if entity_name.startswith('svc-'):
-            entity_name = entity_name[len('svc-'):]
+        if "-" in entity_name:
+            entity_name = entity_name[entity_name.index('-')+1:]
             policy_list.append('service-self-ro')
 
         metadata = {"ldap_type": "UAD"}

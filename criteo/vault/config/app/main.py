@@ -184,7 +184,7 @@ def main():
 
         update_ldap_group_aliases(client, ctx=ctx)
         update_ldap_entity_aliases(client, ctx=ctx)
-        attach_aliases_from_backend(client, ctx, "jwt")
+        attach_aliases_from_backend(client, ctx, "jwt", False)
 
 
 if __name__ == '__main__':
