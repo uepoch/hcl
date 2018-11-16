@@ -94,6 +94,7 @@ def apply_configuration(client, conf_dir, cleanup=False):
             if os.path.isdir(r):
                 dirs.append(r)
             else:
+                logging.debug("loading %s" % r)
                 configs.append((vaultify_path(r), parse(r)))
         do_cleanup = cleanup and not os.path.exists(folder + '/.nocleanup')
         api_path = vaultify_path(folder)

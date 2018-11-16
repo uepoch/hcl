@@ -120,19 +120,19 @@ def attach_aliases_from_backend(client, ctx, backend, strip_ldap_prefix=True):
         logging.debug("entity {name} has id {id}".format(name=entity_name, id=identity_entity_id))
 
         # Search for an entity with an already attached alias with this name
-        identity_entity_alias_id, entity_alias_data = lookup_entity_by_name(client, entity_name, backend_accessor)
-
+        identity_entity_alias_id, entity_alias_data = lookup_entity_by_name(client, alias_name, backend_accessor)
         # We are the source of truth, if alias entity_id is not the right one, we override it
         # This usually mean someone logged in with a method before we actually mapped him to its virtual entity
         if identity_entity_alias_id and identity_entity_alias_id != identity_entity_id:
-            delete_identity_generic(client, 'entity', identity_entity_id, alias=False)
-            identity_entity_id = identity_entity_alias_id
-            entity_data = entity_alias_data
+            logging.warn("found mismatched entity id between already present alias and the legal one")
+            logging.warn("entity {entity_name}: {entity_id}".format(entity_name, identity_entity_id))
+            logging.warn("conflicting: {alias_e_id}".format(identity_entity_alias_id))
+            delete_identity_generic(client, 'entity', identity_entity_alias_id, alias=False)
 
         alias_entity_id = None
         assert (type(entity_data) is dict)
         entity_aliases = entity_data.get("aliases", None) or []
-        relevant_alias = [x for x in entity_aliases if x['mount_accessor'] == backend_accessor]
+        relevant_alias = [x for x in entity_aliases if x['mount_accessor'] == backend_accessor and x['name'] == alias_name]
 
         if len(relevant_alias) > 0:
             alias_entity_id = relevant_alias[0]['id']
@@ -143,6 +143,7 @@ def attach_aliases_from_backend(client, ctx, backend, strip_ldap_prefix=True):
             # We know him, don't delete it
             aliases_to_delete.remove(alias_entity_id)
     for ID in aliases_to_delete:
+        logging.info("removing alias {id}")
         delete_identity_generic(client, 'entity', ID, alias=True)
 
 
@@ -219,6 +220,7 @@ def update_ldap_entity_aliases(client, ctx):
             identity_entity_id, entity_data = create_entity(client, entity_name)
         logging.debug("entity {name} has id {id}".format(name=entity_name, id=identity_entity_id))
         identity_entity_alias_id, entity_alias_data = lookup_entity_by_name(client, alias_name, ldap_accessor)
+        logging.debug("lookup [aliasname={aliasname}]: identity_entity_alias_id: {alias_id}, identity_entity_alias_data: {data}".format(aliasname=alias_name, alias_id=identity_entity_alias_id, data=entity_alias_data))
         if identity_entity_alias_id and identity_entity_alias_id != identity_entity_id:
             delete_identity_generic(client, 'entity', identity_entity_id, alias=False)
             identity_entity_id = identity_entity_alias_id
