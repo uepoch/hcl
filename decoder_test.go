@@ -322,6 +322,17 @@ func TestDecode_interface(t *testing.T) {
 			true,
 			nil,
 		},
+		{
+			"object_nested_list.json",
+			false,
+			map[string]interface{}{
+				"obj": []map[string]interface{}{
+					map[string]interface{}{
+						"listoflist": []interface{}{[]interface{}{"list"}, []interface{}{"oflist"}},
+					},
+				},
+			},
+		},
 
 		{
 			"object_list.json",

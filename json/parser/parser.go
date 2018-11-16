@@ -238,9 +238,11 @@ func (p *Parser) listType() (*ast.ListType, error) {
 		case token.BOOL:
 			// TODO(arslan) should we support? not supported by HCL yet
 		case token.LBRACK:
-			// TODO(arslan) should we support nested lists? Even though it's
-			// written in README of HCL, it's not a part of the grammar
-			// (not defined in parse.y)
+			node, err := p.listType()
+			if err != nil {
+				return nil, err
+			}
+			l.Add(node)
 		case token.RBRACK:
 			// finished
 			return l, nil
